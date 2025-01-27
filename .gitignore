@@ -256,4 +256,7 @@ Temporary Items
 .history
 .ionide
 
+# environmental variables (secrets)
+.env
+
 # End of https://www.toptal.com/developers/gitignore/api/macos,linux,jetbrains,pycharm,visualstudiocode
