@@ -10,9 +10,11 @@ and the job description provided.
 """
 
 # Import dependencies
-import dotenv, os
+import dotenv, os, re
 import google.generativeai as genai
 from google.generativeai.types import GenerateContentResponse
+from markdown import markdown
+from xhtml2pdf import pisa
 
 
 def load_Google_API_key() -> str | None:
@@ -44,6 +46,50 @@ def create_prompt(job_description: str, my_info: str) -> GenerateContentResponse
     model = setup_Google_Gemini(API_KEY)
     return model.generate_content([job_description, my_info, 'Generate a sample resume in markdown format that will be '
                                                              'designed for my skills and the job description provided.'])
+
+def generate_resume_pdf(response_text: str, filename='Steven Sousa - Resume.pdf'):
+    """
+
+    :param response_text: Google Gemini API response
+    :param filename: Default filename
+    :return: generated pdf
+    """
+    response_text = re.sub(r'```(markdown)?', '', response_text, flags=re.IGNORECASE)
+    html = markdown(response_text)
+
+    css = """
+        <style>
+            body {
+                font-family: 'Helvetica';
+                font-size: 12px;
+                line-height: 1.3;
+                padding: 20px;
+            }
+            h1, h2, h3 {
+                 margin-top: 15px;
+            }
+            b, strong {
+                font-weight: bold;
+            }
+            ul {
+                margin-left: 20px;
+                padding-left: 20px;
+            }
+            li {
+                margin-bottom: 5px;
+                list-style-type: disc;
+            }
+        </style>
+    """
+    html = css + html
+    try:
+        with open(filename, 'wb') as pdf:
+            pisa_status = pisa.CreatePDF(html, dest=pdf)
+        if pisa_status.err:
+            print(f'Error generating PDF: {pisa_status.err}')
+        print(f'PDF generated successfully as {filename}.pdf')
+    except Exception as e:
+        print(f'Error generating PDF: {e}')
 
 job_description = ('Prototype, create, maintain, extend, and improve, and automate complex and flexible data-driven data '
                    'reporting and analysis tools used by the Research and Development groups in the U.S. and France and '
@@ -103,3 +149,9 @@ my_info = ('My name is Steven Sousa, I am a software engineer with a strong back
 
 response = create_prompt(job_description, my_info)
 print(response.text)
+
+# Save response to pdf
+generate_resume_pdf(response.text)
+
+# Exit program
+print('Program finished successfully.')
