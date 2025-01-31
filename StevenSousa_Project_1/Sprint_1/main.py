@@ -37,7 +37,7 @@ def setup_Google_Gemini(api_key: str) -> genai.GenerativeModel | None:
 
 def create_prompt(job_description: str, my_info: str) -> GenerateContentResponse:
     """
-
+    Send prompt to Google Gemini API
     :param job_description:
     :param my_info:
     :return: Google AI Studio answer in markdown format
@@ -49,39 +49,13 @@ def create_prompt(job_description: str, my_info: str) -> GenerateContentResponse
 
 def generate_resume_pdf(response_text: str, filename='Steven Sousa - Resume.pdf'):
     """
-
+    Generate pdf from Google Gemini API response
     :param response_text: Google Gemini API response
     :param filename: Default filename
     :return: generated pdf
     """
     response_text = re.sub(r'```(markdown)?', '', response_text, flags=re.IGNORECASE)
     html = markdown(response_text)
-
-    css = """
-        <style>
-            body {
-                font-family: 'Helvetica';
-                font-size: 12px;
-                line-height: 1.3;
-                padding: 20px;
-            }
-            h1, h2, h3 {
-                 margin-top: 15px;
-            }
-            b, strong {
-                font-weight: bold;
-            }
-            ul {
-                margin-left: 20px;
-                padding-left: 20px;
-            }
-            li {
-                margin-bottom: 5px;
-                list-style-type: disc;
-            }
-        </style>
-    """
-    html = css + html
     try:
         with open(filename, 'wb') as pdf:
             pisa_status = pisa.CreatePDF(html, dest=pdf)
