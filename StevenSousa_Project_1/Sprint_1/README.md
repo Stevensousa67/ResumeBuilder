@@ -1,11 +1,28 @@
+# Project Objectives
+- Create a private github repo for this project
+- Setup an API key for an LLM
+- Send a prompt and retrieve the answer
+
+# Why Google Gemini LLM?
+I chose this LLM because I already had an account with Google, had previously utilized this LLM, and due to its ease 
+of setting up.
+
+# Prompt Construction
+The prompts I chose are essentially 3:
+1. Job Description: I hard-coded the first job description inside the rapid_jobs2.json file in its entirety, no changes made.
+2. My Information: I provided some vague information about myself in order to protect my privacy.
+3. Prompt: The prompt I settled on was passing the job description, my information, and response to be in markdown format. I settled on the current state because it provides enough vague information to tailor a favorable response. Of course, as more details about myself is added, the more detailed the response will be.
+
 # Dependencies
-- Python 3.9+, dotenv, os, google.generativeai, google.generativeai.types, API key for Gemini
+- Python 3.9+, dotenv, os, re, google.generativeai, google.generativeai.types, API key for Gemini, markdown, xhtml2pdf
 
 # How to install dependencies
 - Python: https://www.python.org/downloads/
+- os & re: standard python libraries, no need to pip install
 - dotenv: pip install python-dotenv
-- os: standard library, no need to pip install
 - google.generativeai: pip install -q -U google-generativeai
+- markdown: pip install markdown
+- xhtml2pdf: pip install xhtml2pdf
 - API key located in .env file
 
 # How to Run
@@ -13,7 +30,7 @@
 Once all dependencies have been installed, simply run the main.py file. The Gemini response will appear in the terminal.
 I have hard coded the job description, information about myself, and what to return. Should you want a different job
 description, simply look for "description" key in the rapid_jobs2.json file, copy it's content, and paste into the 
-job_description variable.
+job_description variable. Additionally, the program will save the pdf version of the response called "Steven Sousa - Resume".
 
 # Sample Input
 
@@ -133,6 +150,5 @@ Highly motivated and skilled software engineer with a strong foundation in web d
 * **Enthusiasm:**  Highlight your passion for learning and contributing to healthcare, as mentioned in the job description.
 * **Cover Letter:** Write a compelling cover letter that connects your skills and experience to the specific requirements of the role.  Address your lack of professional experience by emphasizing your project work, relevant coursework, and eagerness to learn.
 ```
-
 
 This resume format provides a strong foundation for your application.  Remember to customize it further based on the specific requirements of the job posting and highlight the projects and skills that best align with Bio-Rad's needs. Good luck!
