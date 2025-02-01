@@ -138,4 +138,3 @@ generate_resume_pdf(response.text)
 
 # Exit program
 print('Program finished successfully.')
-
