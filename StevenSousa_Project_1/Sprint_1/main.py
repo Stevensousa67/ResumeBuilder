@@ -10,7 +10,9 @@ and the job description provided.
 """
 
 # Import dependencies
-import dotenv, os, re
+import dotenv
+import os
+import re
 import google.generativeai as genai
 from google.generativeai.types import GenerateContentResponse
 from markdown import markdown
@@ -22,6 +24,7 @@ def load_Google_API_key() -> str | None:
     Loads Google API key from .env file
     :return: api_key
     """
+
     dotenv.load_dotenv(os.path.join(os.path.dirname(os.getcwd()), '.env'))
     return os.getenv('GOOGLE_AI_API_KEY')
 
@@ -32,8 +35,10 @@ def setup_Google_Gemini(api_key: str) -> genai.GenerativeModel | None:
     :param api_key:
     :return: gemini-1.5-pro
     """
+
     genai.configure(api_key=api_key)
     return genai.GenerativeModel('gemini-1.5-pro')
+
 
 def create_prompt(job_description: str, my_info: str) -> GenerateContentResponse:
     """
@@ -42,10 +47,12 @@ def create_prompt(job_description: str, my_info: str) -> GenerateContentResponse
     :param my_info:
     :return: Google AI Studio answer in markdown format
     """
+
     API_KEY = load_Google_API_key()
     model = setup_Google_Gemini(API_KEY)
     return model.generate_content([job_description, my_info, 'Generate a sample resume in markdown format that will be '
                                                              'designed for my skills and the job description provided.'])
+
 
 def generate_resume_pdf(response_text: str, filename='Steven Sousa - Resume.pdf'):
     """
@@ -54,6 +61,7 @@ def generate_resume_pdf(response_text: str, filename='Steven Sousa - Resume.pdf'
     :param filename: Default filename
     :return: generated pdf
     """
+
     response_text = re.sub(r'```(markdown)?', '', response_text, flags=re.IGNORECASE)
     html = markdown(response_text)
     try:
@@ -64,6 +72,7 @@ def generate_resume_pdf(response_text: str, filename='Steven Sousa - Resume.pdf'
         print(f'PDF generated successfully as {filename}.pdf')
     except Exception as e:
         print(f'Error generating PDF: {e}')
+
 
 job_description = ('Prototype, create, maintain, extend, and improve, and automate complex and flexible data-driven data '
                    'reporting and analysis tools used by the Research and Development groups in the U.S. and France and '
@@ -129,3 +138,4 @@ generate_resume_pdf(response.text)
 
 # Exit program
 print('Program finished successfully.')
+
