@@ -13,6 +13,7 @@ and the job description provided.
 import dotenv
 import os
 import re
+import datetime
 import google.generativeai as genai
 from google.generativeai.types import GenerateContentResponse
 from markdown import markdown
@@ -53,8 +54,7 @@ def create_prompt(job_description: str, my_info: str) -> GenerateContentResponse
     return model.generate_content([job_description, my_info, 'Generate a sample resume in markdown format that will be '
                                                              'designed for my skills and the job description provided.'])
 
-
-def generate_resume_pdf(response_text: str, filename='Steven Sousa - Resume.pdf'):
+def generate_resume_pdf(response_text: str, filename=f'Steven Sousa - Resume {datetime.datetime.now()}.pdf'):
     """
     Generate pdf from Google Gemini API response
     :param response_text: Google Gemini API response
@@ -62,7 +62,8 @@ def generate_resume_pdf(response_text: str, filename='Steven Sousa - Resume.pdf'
     :return: generated pdf
     """
 
-    response_text = re.sub(r'```(markdown)?', '', response_text, flags=re.IGNORECASE)
+    # Remove ```markdown at beginning of response
+    response_text = re.sub(r"^```(?:markdown)?\n(.*?)\n?```", r"\1", response_text, flags=re.DOTALL | re.MULTILINE)
     html = markdown(response_text)
     try:
         with open(filename, 'wb') as pdf:
