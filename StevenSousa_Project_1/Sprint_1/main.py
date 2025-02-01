@@ -61,7 +61,6 @@ def generate_resume_pdf(response_text: str, filename=f'Steven Sousa - Resume {da
     :param filename: Default filename
     :return: generated pdf
     """
-
     # Remove ```markdown at beginning of response
     response_text = re.sub(r"^```(?:markdown)?\n(.*?)\n?```", r"\1", response_text, flags=re.DOTALL | re.MULTILINE)
     html = markdown(response_text)
