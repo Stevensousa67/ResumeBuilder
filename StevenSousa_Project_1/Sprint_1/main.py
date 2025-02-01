@@ -54,6 +54,7 @@ def create_prompt(job_description: str, my_info: str) -> GenerateContentResponse
     return model.generate_content([job_description, my_info, 'Generate a sample resume in markdown format that will be '
                                                              'designed for my skills and the job description provided.'])
 
+
 def generate_resume_pdf(response_text: str, filename=f'Steven Sousa - Resume {datetime.datetime.now()}.pdf'):
     """
     Generate pdf from Google Gemini API response
