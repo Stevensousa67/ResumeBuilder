@@ -31,7 +31,7 @@ def open_db(dbname: str, user: str, password: str, host: str, port: str) -> Tupl
         )
         cursor = conn.cursor()
         return conn, cursor
-    except(Exception, DatabaseError) as error:
+    except (Exception, DatabaseError) as error:
         print(error)
         raise error
 
@@ -80,7 +80,7 @@ def insert_job(cursor: Cursor, conn: Connection, job_tuple: Tuple) -> None:
     :param job_tuple: job tuple to be inserted into the database
     :return: None
     """
-    sql_statement = """INSERT INTO jobs 
+    sql_statement = """INSERT INTO jobs
     (job_id, job_title, company_name, job_description, location, min_salary, max_salary, salary_time, posted_date, url, remote)
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     ON CONFLICT (job_id) DO NOTHING;"""
@@ -100,4 +100,3 @@ def save_to_db(cursor: Cursor, all_jobs: list[Tuple]) -> None:
             insert_job(cursor, job)
         except Exception as e:
             print(f"Error inserting job into DB: {e}")
-

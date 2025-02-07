@@ -9,7 +9,6 @@ This file will parse the json files containing jobs and save them to the DB crea
 # Import dependencies
 import json
 import openpyxl
-from typing import Tuple
 
 
 def process_json(filename: str, existing_job_ids: set, sheet) -> None:
