@@ -8,11 +8,10 @@ This file will parse the json files containing jobs and save them to the DB crea
 """
 # Import dependencies
 import json
-
 import openpyxl
 
 
-def read_json_and_save_to_excel(filename: str, spreadsheet_name='jobs.xlsx') -> None:
+def json_to_excel(filename: str, spreadsheet_name='jobs.xlsx') -> None:
     """
     This function will parse rapid_jobs2.json and save it to a spreadsheet.
 
@@ -29,7 +28,8 @@ def read_json_and_save_to_excel(filename: str, spreadsheet_name='jobs.xlsx') -> 
         # If file not found, create one
         workbook = openpyxl.Workbook()
         sheet = workbook.active
-        sheet.append(["Job ID", "Job Title", "Company Name", "Job Description", "Location", "Min Salary", "Max Salary", "Salary Time", "Posted Date", "URL", "Remote"])
+        sheet.append(["Job ID", "Job Title", "Company Name", "Job Description", "Location", "Min Salary",
+                      "Max Salary", "Salary Time", "Posted Date", "URL", "Remote"])
         print(f"Spreadsheet '{spreadsheet_name}' created successfully.")
 
     existing_job_ids = set()
@@ -38,7 +38,7 @@ def read_json_and_save_to_excel(filename: str, spreadsheet_name='jobs.xlsx') -> 
         if job_id:
             existing_job_ids.add(job_id)
 
-    with open(filename, "r") as file:
+    with open(filename) as file:
         for line in file:
             try:
                 json_objects = json.loads(line.strip())
@@ -60,7 +60,8 @@ def read_json_and_save_to_excel(filename: str, spreadsheet_name='jobs.xlsx') -> 
                         job_providers = obj.get('jobProviders', [])  # Default to empty list if missing
                         url = job_providers[0].get('url', 'URL Not Found') if job_providers else 'URL Not Found'
                         remote = True if 'remote' in location.lower() else False
-                        job_tuple = (job_id, job_title, company_name, job_description, location, min_salary, max_salary, salary_time, posted_date, url, remote)
+                        job_tuple = (job_id, job_title, company_name, job_description, location, min_salary,
+                                     max_salary, salary_time, posted_date, url, remote)
 
                         if job_id not in existing_job_ids:
                             sheet.append(job_tuple)

@@ -7,13 +7,11 @@ Version: 06Feb2025
 This program handles the creation of the PostgreSQL database utilized in Sprint 2. If a db already exists, it will do
  noting. Additionally, if a job_id already exists in the database, it won't add it again.
 """
-
 from typing import Tuple
+from psycopg import DatabaseError, Connection, Cursor, connect
 
-import psycopg
 
-
-def open_db(dbname: str, user: str, password: str, host: str, port: str) -> Tuple[psycopg.Connection, psycopg.Cursor]:
+def open_db(dbname: str, user: str, password: str, host: str, port: str) -> Tuple[Connection, Cursor]:
     """
     This function will open a connection to the PostgreSQL database.
     :param dbname:
@@ -24,7 +22,7 @@ def open_db(dbname: str, user: str, password: str, host: str, port: str) -> Tupl
     :return: connection and cursor to the database
     """
     try:
-        conn = psycopg.connect(
+        conn = connect(
             dbname=dbname,
             user=user,
             password=password,
@@ -33,12 +31,12 @@ def open_db(dbname: str, user: str, password: str, host: str, port: str) -> Tupl
         )
         cursor = conn.cursor()
         return conn, cursor
-    except(Exception, psycopg.DatabaseError) as error:
+    except(Exception, DatabaseError) as error:
         print(error)
-        raise
+        raise error
 
 
-def close_db(conn: psycopg.Connection, cursor: psycopg.Cursor) -> None:
+def close_db(conn: Connection, cursor: Cursor) -> None:
     """
     This function will save any changes to the database and close the connection.
     :param conn:
@@ -50,7 +48,7 @@ def close_db(conn: psycopg.Connection, cursor: psycopg.Cursor) -> None:
     conn.close()
 
 
-def setup_db(cursor: psycopg.Cursor, conn: psycopg.Connection) -> None:
+def setup_db(cursor: Cursor, conn: Connection) -> None:
     """
     This function will create the jobs table if it doesn't already exist
     :param cursor:
@@ -74,7 +72,7 @@ def setup_db(cursor: psycopg.Cursor, conn: psycopg.Connection) -> None:
     conn.commit()
 
 
-def insert_job(cursor: psycopg.Cursor, conn: psycopg.Connection, job_tuple: Tuple) -> None:
+def insert_job(cursor: Cursor, conn: Connection, job_tuple: Tuple) -> None:
     """
     This function will insert a job into the jobs table.
     :param cursor:
@@ -90,12 +88,11 @@ def insert_job(cursor: psycopg.Cursor, conn: psycopg.Connection, job_tuple: Tupl
     conn.commit()
 
 
-
-def save_to_db(cursor: psycopg.Cursor, all_jobs: list[Tuple]) -> None:
+def save_to_db(cursor: Cursor, all_jobs: list[Tuple]) -> None:
     """
     This function will save all jobs to the database.
-    :param cursor:
-    :param all_jobs:
+    :param: cursor
+    :param: all_jobs
     :return: None
     """
     for job in all_jobs:
@@ -103,5 +100,4 @@ def save_to_db(cursor: psycopg.Cursor, all_jobs: list[Tuple]) -> None:
             insert_job(cursor, job)
         except Exception as e:
             print(f"Error inserting job into DB: {e}")
-
 

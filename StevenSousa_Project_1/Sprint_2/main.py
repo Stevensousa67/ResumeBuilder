@@ -24,8 +24,7 @@ conn, cursor = DBUtils.open_db(os.getenv('DB_NAME'), os.getenv('DB_USER'), os.ge
 DBUtils.setup_db(cursor, conn)
 
 # Process data
-Data_Processing.read_json_and_save_to_excel('rapid_jobs2.json')
+Data_Processing.json_to_excel('rapid_jobs2.json')
 
 # Exit program
 print('Program finished successfully.')
-
