@@ -4,13 +4,9 @@
 - Send any job description from DB to Gemini
 
 # Dependencies
-- Python 3.9+, dotenv, os, re, google.generativeai, google.generativeai.types, API key for Gemini, markdown, xhtml2pdf
+- Python 3.9+, dotenv, os, re, google.generativeai, google.generativeai.types, API key for Gemini, markdown, xhtml2pdf, openpyxl PostgreSQL 17
 
 # How to install dependencies
-- Python: https://www.python.org/downloads/
-- os & re: standard python libraries, no need to pip install
-- dotenv: pip install python-dotenv
-- google.generativeai: pip install -q -U google-generativeai
-- markdown: pip install markdown
-- xhtml2pdf: pip install xhtml2pdf
-- API key located in .env file
+- cd into StevenSousa_Project_1 and run the command pip install -r requirements.txt
+- Download and install PostgreSQL 17 (https://postgresapp.com/downloads.html) and start the server
+- API key and DB info located in .env file
