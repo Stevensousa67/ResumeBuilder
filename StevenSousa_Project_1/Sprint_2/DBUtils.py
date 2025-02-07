@@ -14,11 +14,11 @@ from psycopg import DatabaseError, Connection, Cursor, connect
 def open_db(dbname: str, user: str, password: str, host: str, port: str) -> Tuple[Connection, Cursor]:
     """
     This function will open a connection to the PostgreSQL database.
-    :param dbname:
-    :param user:
-    :param password:
-    :param host:
-    :param port:
+    :param dbname: os.getenv('DB_NAME')
+    :param user: os.getenv('DB_USER')
+    :param password: os.getenv('DB_PASSWORD')
+    :param host: os.getenv('DB_HOST')
+    :param port: os.getenv('DB_PORT')
     :return: connection and cursor to the database
     """
     try:
@@ -39,8 +39,8 @@ def open_db(dbname: str, user: str, password: str, host: str, port: str) -> Tupl
 def close_db(conn: Connection, cursor: Cursor) -> None:
     """
     This function will save any changes to the database and close the connection.
-    :param conn:
-    :param cursor:
+    :param conn: connection to the database
+    :param cursor: cursor to the database
     :return: None
     """
     conn.commit()
@@ -51,8 +51,8 @@ def close_db(conn: Connection, cursor: Cursor) -> None:
 def setup_db(cursor: Cursor, conn: Connection) -> None:
     """
     This function will create the jobs table if it doesn't already exist
-    :param cursor:
-    :param conn:
+    :param cursor: connection to the database
+    :param conn: cursor to the database
     :return: None
     """
     cursor.execute(
@@ -75,9 +75,9 @@ def setup_db(cursor: Cursor, conn: Connection) -> None:
 def insert_job(cursor: Cursor, conn: Connection, job_tuple: Tuple) -> None:
     """
     This function will insert a job into the jobs table.
-    :param cursor:
-    :param conn:
-    :param job_tuple:
+    :param cursor: cursor to the database
+    :param conn: connection to the database
+    :param job_tuple: job tuple to be inserted into the database
     :return: None
     """
     sql_statement = """INSERT INTO jobs 
@@ -91,8 +91,8 @@ def insert_job(cursor: Cursor, conn: Connection, job_tuple: Tuple) -> None:
 def save_to_db(cursor: Cursor, all_jobs: list[Tuple]) -> None:
     """
     This function will save all jobs to the database.
-    :param: cursor
-    :param: all_jobs
+    :param cursor: cursor to the database
+    :param all_jobs: list of job tuples to be saved to the database
     :return: None
     """
     for job in all_jobs:
