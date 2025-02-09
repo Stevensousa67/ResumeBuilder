@@ -96,5 +96,11 @@ def get_remote_status(job_obj):
     """
 
     location = job_obj.get('location', '').lower()
-    is_remote_str = job_obj.get('is_remote', '')
-    return 'remote' in location or (is_remote_str and is_remote_str.lower() == "true")
+    is_remote = job_obj.get('is_remote', '')
+
+    if 'remote' in location:
+        return True
+    elif is_remote != '':
+        return is_remote
+    else:
+        return False
