@@ -36,7 +36,6 @@ def process_json(filename: str, conn: DBUtils.Connection, cursor: DBUtils.Cursor
                     print(f"Skipping invalid line: {line.strip()}")
                     continue  # Skip lines with invalid JSON structure
 
-
                 for obj in objects:
                     job_id = obj.get('id', 'N/A')
                     job_title = obj.get('title', 'N/A')
@@ -50,22 +49,8 @@ def process_json(filename: str, conn: DBUtils.Connection, cursor: DBUtils.Cursor
                     salary_time = obj.get('salary_time', obj.get('interval', 'yearly'))
 
                     posted_date = obj.get('datePosted', obj.get('date_posted', 'N/A'))
-
-                    # Handle different URL and remote keys:
-                    url = 'URL Not Found'
-                    if 'jobProviders' in obj:
-                        job_providers = obj.get('jobProviders', [])
-                        url = job_providers[0].get('url', 'URL Not Found') if job_providers else 'URL Not Found'
-                    elif 'job_url_direct' in obj:
-                        url = obj.get('job_url_direct', 'URL Not Found')
-
-                    remote = False
-                    if 'remote' in str(location).lower():
-                       remote = True
-                    elif 'is_remote' in obj:
-                        remote = obj.get('is_remote', False)
-                        if remote == '':
-                            remote = False
+                    url = get_url(obj)
+                    remote = get_remote_status(obj)
 
                     job_tuple = (job_id, job_title, company_name, job_description, location, min_salary, max_salary,
                                  salary_time, posted_date, url, remote)
@@ -88,3 +73,28 @@ def convert_salary(salary: str) -> int:
     except ValueError:
         print(f"Unexpected salary format: {salary}")
         return 0
+
+
+def get_url(job_obj):
+    """Extracts the URL from a job object, handling different key names.
+    :param job_obj: Job object.
+    :return: URL.
+    """
+
+    if 'jobProviders' in job_obj:
+        job_providers = job_obj.get('jobProviders', [])
+        return job_providers[0].get('url', 'URL Not Found') if job_providers else 'URL Not Found'
+    elif 'job_url_direct' in job_obj:
+        return job_obj.get('job_url_direct', 'URL Not Found')
+    return 'URL Not Found'
+
+
+def get_remote_status(job_obj):
+    """Determines the remote status from a job object.
+    :param job_obj: Job object.
+    :return: Remote status.
+    """
+
+    location = job_obj.get('location', '').lower()
+    is_remote_str = job_obj.get('is_remote', '')
+    return 'remote' in location or (is_remote_str and is_remote_str.lower() == "true")
