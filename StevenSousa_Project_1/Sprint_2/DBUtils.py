@@ -8,7 +8,7 @@ This program handles the creation of the PostgreSQL database utilized in Sprint 
  noting. Additionally, if a job_id already exists in the database, it won't add it again.
 """
 from typing import Tuple
-from psycopg import DatabaseError, Connection, Cursor, connect
+from psycopg import DatabaseError, Connection, Cursor, connect, sql
 
 
 def open_db(dbname: str, user: str, password: str, host: str, port: str) -> Tuple[Connection, Cursor]:
@@ -55,7 +55,7 @@ def setup_db(cursor: Cursor, conn: Connection) -> None:
     :param conn: cursor to the database
     :return: None
     """
-    cursor.execute(
+    cursor.execute(sql.SQL(
         """CREATE TABLE IF NOT EXISTS jobs(
         job_id TEXT PRIMARY KEY,
         job_title TEXT NOT NULL,
@@ -68,35 +68,38 @@ def setup_db(cursor: Cursor, conn: Connection) -> None:
         posted_date TEXT,
         url TEXT NOT NULL,
         remote BOOLEAN DEFAULT FALSE);"""
-    )
+    ))
     conn.commit()
 
 
 def insert_job(cursor: Cursor, conn: Connection, job_tuple: Tuple) -> None:
     """
-    This function will insert a job into the jobs table.
+    Inserts a job into the jobs table.
     :param cursor: cursor to the database
     :param conn: connection to the database
-    :param job_tuple: job tuple to be inserted into the database
+    :param job_tuple: job_tuple: Tuple containing job details
     :return: None
     """
-    sql_statement = """INSERT INTO jobs
-    (job_id, job_title, company_name, job_description, location, min_salary, max_salary, salary_time, posted_date, url, remote)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-    ON CONFLICT (job_id) DO NOTHING;"""
-    cursor.execute(sql_statement, job_tuple)
+    cursor.execute(sql.SQL(
+        """INSERT INTO jobs
+        (job_id, job_title, company_name, job_description, location, min_salary, max_salary, salary_time, posted_date,
+         url, remote)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT (job_id) DO NOTHING;
+    """), job_tuple)
     conn.commit()
 
 
-def save_to_db(cursor: Cursor, all_jobs: list[Tuple]) -> None:
-    """
-    This function will save all jobs to the database.
+def drop_table(cursor: Cursor, conn: Connection) -> None:
+    """ This function will drop the DB.
     :param cursor: cursor to the database
-    :param all_jobs: list of job tuples to be saved to the database
+    :param conn: connection to the database
     :return: None
     """
-    for job in all_jobs:
-        try:
-            insert_job(cursor, job)
-        except Exception as e:
-            print(f"Error inserting job into DB: {e}")
+    cursor.execute(sql.SQL(
+        """DROP TABLE IF EXISTS jobs
+        RESTRICT;"""
+    ))
+    conn.commit()
+    cursor.close()
+    conn.close()
