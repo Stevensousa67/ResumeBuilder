@@ -20,11 +20,11 @@ dotenv.load_dotenv(os.path.join(os.path.dirname(os.getcwd()), '.env'))
 # Create DB Connection
 conn, cursor = DBUtils.open_db(os.getenv('DB_NAME'), os.getenv('DB_USER'), os.getenv('DB_PASSWORD'),
                                os.getenv('DB_HOST'), os.getenv('DB_PORT'))
-# Create DB
+# Create table in DB
 DBUtils.setup_db(cursor, conn)
 
 # Process data
-Data_Processing.json_to_excel('rapid_jobs2.json')
+Data_Processing.process_json('rapidResults.json', conn, cursor)
 
 # Exit program
 print('Program finished successfully.')
