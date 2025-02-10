@@ -48,7 +48,7 @@ def close_db(conn: Connection, cursor: Cursor) -> None:
     conn.close()
 
 
-def setup_db(cursor: Cursor, conn: Connection) -> None:
+def setup_db(conn: Connection, cursor: Cursor) -> None:
     """
     This function will create the jobs table if it doesn't already exist
     :param cursor: connection to the database
@@ -72,7 +72,7 @@ def setup_db(cursor: Cursor, conn: Connection) -> None:
     conn.commit()
 
 
-def insert_job(cursor: Cursor, conn: Connection, job_tuple: Tuple) -> None:
+def insert_job(conn: Connection, cursor: Cursor, job_tuple: Tuple) -> None:
     """
     Inserts a job into the jobs table.
     :param cursor: cursor to the database
@@ -90,8 +90,8 @@ def insert_job(cursor: Cursor, conn: Connection, job_tuple: Tuple) -> None:
     conn.commit()
 
 
-def drop_table(cursor: Cursor, conn: Connection) -> None:
-    """ This function will drop the DB.
+def drop_table(conn: Connection, cursor: Cursor) -> None:
+    """ This function will drop the job table in the DB.
     :param cursor: cursor to the database
     :param conn: connection to the database
     :return: None
@@ -103,3 +103,16 @@ def drop_table(cursor: Cursor, conn: Connection) -> None:
     conn.commit()
     cursor.close()
     conn.close()
+
+
+def retrieve_job(conn: Connection, cursor: Cursor) -> Tuple:
+    """
+    This function will retrieve the a job from the DB.
+    :param cursor: cursor to the database
+    :param conn: connection to the database
+    :return: job
+    """
+    cursor.execute(sql.SQL(
+        """SELECT * FROM jobs WHERE job_id = %s"""
+    ))
+    return cursor.fetchone()

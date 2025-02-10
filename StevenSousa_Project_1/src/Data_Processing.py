@@ -8,6 +8,7 @@ This file will parse the json files containing jobs and save them to the DB crea
 """
 # Import dependencies
 import json
+
 import DBUtils
 
 
@@ -44,9 +45,9 @@ def process_json(filename: str, conn: DBUtils.Connection, cursor: DBUtils.Cursor
                     location = obj.get('location', 'N/A')
 
                     # Handle different salary keys depending on file passed in:
-                    min_salary = convert_salary(obj.get('min_salary', obj.get('min_amount', "")))
-                    max_salary = convert_salary(obj.get('max_salary', obj.get('max_amount', "")))
-                    salary_time = obj.get('salary_time', obj.get('interval', 'yearly'))
+                    min_salary = convert_salary(obj.get('salaryRange', obj.get('min_amount', 0)))
+                    max_salary = convert_salary(obj.get('salaryRange', obj.get('max_amount', 0)))
+                    salary_time = get_salary_frequency(obj)
 
                     posted_date = obj.get('datePosted', obj.get('date_posted', 'N/A'))
                     url = get_url(obj)
@@ -54,10 +55,28 @@ def process_json(filename: str, conn: DBUtils.Connection, cursor: DBUtils.Cursor
 
                     job_tuple = (job_id, job_title, company_name, job_description, location, min_salary, max_salary,
                                  salary_time, posted_date, url, remote)
-                    DBUtils.insert_job(cursor, conn, job_tuple)
+                    DBUtils.insert_job(conn, cursor, job_tuple)
 
             except json.JSONDecodeError as e:
                 print("Error decoding JSON:", e)
+
+
+def get_salary_frequency(job_obj: dict) -> str:
+    """
+    This function returns the salary frequency for a given job object. Default return is 'yearly'.
+    :param job_obj:
+    :return: salary_frequency
+    """
+
+    if 'salaryRange' in job_obj and 'hour' in job_obj['salaryRange']:
+        return 'hourly'
+
+    elif 'salaryRange' in job_obj and job_obj['salaryRange'] == '':
+        return 'yearly'
+
+    elif 'interval' in job_obj:
+        return 'yearly' if job_obj['interval'] == '' else job_obj['interval']
+    return 'yearly'
 
 
 def convert_salary(salary: str) -> int:
@@ -66,16 +85,21 @@ def convert_salary(salary: str) -> int:
     :return: Converted salary.
     """
 
-    if not (salary and salary.isnumeric()):
+    if salary == '':
         return 0
-    try:
-        return int(float(salary))  # Convert to float first to handle decimals
-    except ValueError:
-        print(f"Unexpected salary format: {salary}")
-        return 0
+    return int(float(salary))
 
 
-def get_url(job_obj):
+    # if not (salary and salary.isnumeric()):
+    #     return 0
+    # try:
+    #     return int(float(salary))  # Convert to float first to handle decimals
+    # except ValueError:
+    #     print(f"Unexpected salary format: {salary}")
+    #     return 0
+
+
+def get_url(job_obj: dict):
     """Extracts the URL from a job object, handling different key names.
     :param job_obj: Job object.
     :return: URL.
@@ -84,23 +108,19 @@ def get_url(job_obj):
     if 'jobProviders' in job_obj:
         job_providers = job_obj.get('jobProviders', [])
         return job_providers[0].get('url', 'URL Not Found') if job_providers else 'URL Not Found'
-    elif 'job_url_direct' in job_obj:
-        return job_obj.get('job_url_direct', 'URL Not Found')
+    elif 'job_url' in job_obj:
+        return job_obj.get('job_url', 'URL Not Found')
     return 'URL Not Found'
 
 
-def get_remote_status(job_obj):
+def get_remote_status(job_obj: dict):
     """Determines the remote status from a job object.
     :param job_obj: Job object.
     :return: Remote status.
     """
 
-    location = job_obj.get('location', '').lower()
-    is_remote = job_obj.get('is_remote', '')
-
-    if 'remote' in location:
-        return True
-    elif is_remote != '':
-        return is_remote
-    else:
-        return False
+    if 'is_remote' in job_obj:
+        return False if job_obj['is_remote'] == '' else job_obj['is_remote']
+    elif 'location' in job_obj:
+        return True if 'remote' in job_obj['location'].lower() or 'remote' in job_obj['title'] else False
+    return False
