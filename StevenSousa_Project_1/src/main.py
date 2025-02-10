@@ -26,9 +26,6 @@ def grab_job_description(conn: psycopg.Connection, cursor: psycopg.Cursor) -> st
     """
 
 
-
-
-
 def main():
 
     # Load environment variables
@@ -53,6 +50,7 @@ def main():
 
     # Exit program
     print('Program finished successfully.')
+
 
 if __name__ == '__main__':
     main()

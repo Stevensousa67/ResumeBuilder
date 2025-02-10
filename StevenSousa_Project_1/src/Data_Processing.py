@@ -89,7 +89,6 @@ def convert_salary(salary: str) -> int:
         return 0
     return int(float(salary))
 
-
     # if not (salary and salary.isnumeric()):
     #     return 0
     # try:
