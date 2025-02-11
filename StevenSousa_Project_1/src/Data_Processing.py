@@ -8,6 +8,7 @@ This file will parse the json files containing jobs and save them to the DB crea
 """
 # Import dependencies
 import json
+import re
 import DBUtils
 
 
@@ -43,9 +44,7 @@ def process_json(filename: str, conn: DBUtils.Connection, cursor: DBUtils.Cursor
                     job_description = obj.get('description', 'N/A')
                     location = obj.get('location', 'N/A')
 
-                    # Handle different salary keys depending on file passed in:
-                    min_salary = convert_salary(obj.get('salaryRange', obj.get('min_salary', '0')))
-                    max_salary = convert_salary(obj.get('salaryRange', obj.get('max_salary', '0')))
+                    min_salary, max_salary = parse_salary(obj)
                     salary_time = get_salary_frequency(obj)
 
                     posted_date = obj.get('datePosted', obj.get('date_posted', 'N/A'))
@@ -87,6 +86,37 @@ def convert_salary(salary: str) -> int:
         return int(float(salary))
     else:
         return 0
+
+
+def parse_salary(job_obj: dict) -> tuple:
+    """
+    Parses salary information from a job object. LLM Generated function
+    :param job_obj:
+    :return: Tuple (min_salary, max_salary)
+    """
+
+    if 'min_amount' in job_obj and 'max_amount' in job_obj:
+        min_salary = convert_salary(job_obj['min_amount'])
+        max_salary = convert_salary(job_obj['max_amount'])
+        return min_salary, max_salary
+
+    salary_range = job_obj.get('salaryRange', '')
+    if salary_range:
+        numbers = re.findall(r'[\d,]+K?|\d+', salary_range)
+        salaries = []
+        for num in numbers:
+            num = num.replace(',', '')
+            if num.endswith('K'):
+                salaries.append(int(float(num[:-1]) * 1000))
+            else:
+                salaries.append(int(num))
+
+        if len(salaries) == 2:
+            return salaries[0], salaries[1]
+        elif len(salaries) == 1:
+            return salaries[0], salaries[0]
+
+    return 0, 0
 
 
 def get_url(job_obj: dict):
