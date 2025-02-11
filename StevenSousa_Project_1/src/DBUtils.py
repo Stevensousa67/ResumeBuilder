@@ -8,10 +8,12 @@ This program handles the creation of the PostgreSQL database utilized in Sprint 
  noting. Additionally, if a job_id already exists in the database, it won't add it again.
 """
 from typing import Tuple
+
 from psycopg import DatabaseError, Connection, Cursor, connect, sql
 
 
-def open_db(dbname: str, user: str, password: str, host: str, port: str, autocommit: bool = False) -> Tuple[Connection, Cursor]:
+def open_db(dbname: str, user: str, password: str, host: str, port: str, autocommit: bool = False) -> (
+        Tuple)[Connection, Cursor]:
     """
     This function will open a connection to the PostgreSQL database.
     :param dbname: os.getenv('DB_NAME')

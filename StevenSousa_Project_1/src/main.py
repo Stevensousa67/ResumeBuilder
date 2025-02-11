@@ -4,26 +4,16 @@ Prof.: John Santore
 Institution: Bridgewater State University - COMP490 - Senior Design & Development
 Version: 06Feb2025
 
-Description: This program builds upon the achievements of Spring_1 main.py. In this version, the program can
-programmatically parse the rapid_jobs2.json or rapidResults.json files in order to save each job into a PostgreSQL DB
-and provide the ability to send any job from the DB as a prompt to Google AI Studio.
+Description: In this version, the program will programmatically parse the rapid_jobs2.json or rapidResults.json files
+in order to save each job into a PostgreSQL DB.
 """
 # Import dependencies
 import os
+
 import dotenv
+
 import DBUtils
 import Data_Processing
-import psycopg
-
-
-def grab_job_description(conn: psycopg.Connection, cursor: psycopg.Cursor) -> str:
-    """
-    This function will grab a job description from the DB and return it as a string.
-
-    :param conn: The database connection
-    :param cursor: the database cursor
-    :return: job description
-    """
 
 
 def main():
@@ -59,11 +49,6 @@ def main():
 
     # # Drop table
     # DBUtils.drop_table(conn, cursor)
-
-    # # Generate resume
-    # Generate_resume.generate_resume(os.getenv('GOOGLE_AI_API_KEY'), job_description, os.getenv('CONTACT_INFO'),
-    #                                 os.getenv('SKILLS'), os.getenv('EDUCATION'), os.getenv('EXPERIENCE'),
-    #                                 os.getenv('REFERENCES'), os.getenv('CONSTRAINTS'))
 
     # Exit program
     print('Program finished successfully.')

@@ -1,6 +1,5 @@
 import unittest
 
-
 class MyTestCase(unittest.TestCase):
     def test_get_file_data(self):
         """
