@@ -9,9 +9,7 @@ in order to save each job into a PostgreSQL DB.
 """
 # Import dependencies
 import os
-
 import dotenv
-
 import DBUtils
 import Data_Processing
 

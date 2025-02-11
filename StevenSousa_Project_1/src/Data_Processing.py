@@ -8,7 +8,6 @@ This file will parse the json files containing jobs and save them to the DB crea
 """
 # Import dependencies
 import json
-
 import DBUtils
 
 
@@ -45,8 +44,8 @@ def process_json(filename: str, conn: DBUtils.Connection, cursor: DBUtils.Cursor
                     location = obj.get('location', 'N/A')
 
                     # Handle different salary keys depending on file passed in:
-                    min_salary = convert_salary(obj.get('salaryRange', obj.get('min_amount', 0)))
-                    max_salary = convert_salary(obj.get('salaryRange', obj.get('max_amount', 0)))
+                    min_salary = convert_salary(obj.get('salaryRange', obj.get('min_salary', '0')))
+                    max_salary = convert_salary(obj.get('salaryRange', obj.get('max_salary', '0')))
                     salary_time = get_salary_frequency(obj)
 
                     posted_date = obj.get('datePosted', obj.get('date_posted', 'N/A'))
@@ -68,12 +67,11 @@ def get_salary_frequency(job_obj: dict) -> str:
     :return: salary_frequency
     """
 
-    if 'salaryRange' in job_obj and 'hour' in job_obj['salaryRange']:
-        return 'hourly'
-
-    elif 'salaryRange' in job_obj and job_obj['salaryRange'] == '':
-        return 'yearly'
-
+    if 'salaryRange' in job_obj:
+        if 'hour' in job_obj['salaryRange']:
+            return 'hourly'
+        elif 'year' in job_obj['salaryRange'] or job_obj['salaryRange'] == '':
+            return 'yearly'
     elif 'interval' in job_obj:
         return 'yearly' if job_obj['interval'] == '' else job_obj['interval']
     return 'yearly'
@@ -85,17 +83,10 @@ def convert_salary(salary: str) -> int:
     :return: Converted salary.
     """
 
-    if salary == '':
+    if salary != '':
+        return int(float(salary))
+    else:
         return 0
-    return int(float(salary))
-
-    # if not (salary and salary.isnumeric()):
-    #     return 0
-    # try:
-    #     return int(float(salary))  # Convert to float first to handle decimals
-    # except ValueError:
-    #     print(f"Unexpected salary format: {salary}")
-    #     return 0
 
 
 def get_url(job_obj: dict):
