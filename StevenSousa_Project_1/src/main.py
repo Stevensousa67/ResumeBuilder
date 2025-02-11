@@ -22,9 +22,14 @@ def main():
     dotenv.load_dotenv(os.path.join(os.path.dirname(os.getcwd()), '.env'))
 
     # Connect using PostgresSQL default values
-    conn_default, cursor_default = DBUtils.open_db(os.getenv('DB_NAME_DEFAULT'), os.getenv('DB_USER_DEFAULT'),
-                                           os.getenv('DB_PASSWORD_DEFAULT'), os.getenv('DB_HOST'),
-                                                   os.getenv('DB_PORT'), autocommit=True)
+    conn_default, cursor_default = DBUtils.open_db(
+        os.getenv('DB_NAME_DEFAULT'),
+        os.getenv('DB_USER_DEFAULT'),
+        os.getenv('DB_PASSWORD_DEFAULT'),
+        os.getenv('DB_HOST'),
+        os.getenv('DB_PORT'),
+        autocommit=True
+    )
 
     # Create custom user
     DBUtils.create_user(cursor_default, os.getenv('DB_USER'), os.getenv('DB_PASSWORD'))
@@ -39,8 +44,15 @@ def main():
     DBUtils.close_db(conn_default, cursor_default)
 
     # Start new database connection using new
-    conn, cursor = DBUtils.open_db(os.getenv('DB_NAME'), os.getenv('DB_USER'), os.getenv('DB_PASSWORD'),
-                                   os.getenv('DB_HOST'), os.getenv('DB_PORT'), autocommit=False)
+    conn, cursor = DBUtils.open_db(
+        os.getenv('DB_NAME'),
+        os.getenv('DB_USER'),
+        os.getenv('DB_PASSWORD'),
+        os.getenv('DB_HOST'),
+        os.getenv('DB_PORT'),
+        autocommit=False
+    )
+
     # Create table in DB
     DBUtils.setup_table(conn, cursor)
 
