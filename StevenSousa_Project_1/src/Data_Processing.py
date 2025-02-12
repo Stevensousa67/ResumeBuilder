@@ -22,41 +22,54 @@ def process_json(filename: str, conn: DBUtils.Connection, cursor: DBUtils.Cursor
     :param cursor: Database cursor.
     :return: None
     """
-
-    with open(filename) as file:
+    with open(filename, 'r') as file:
         for line in file:
             try:
                 data = json.loads(line.strip())
-
-                # Handle both JSON formats:
-                if isinstance(data, list):  # Array of objects
-                    objects = data
-                elif isinstance(data, dict):  # Single object
-                    objects = [data]
-                else:
-                    print(f"Skipping invalid line: {line.strip()}")
-                    continue  # Skip lines with invalid JSON structure
-
-                for obj in objects:
-                    job_id = obj.get('id', 'N/A')
-                    job_title = obj.get('title', 'N/A')
-                    company_name = obj.get('company', 'N/A')
-                    job_description = obj.get('description', 'N/A')
-                    location = obj.get('location', 'N/A')
-
-                    min_salary, max_salary = parse_salary(obj)
-                    salary_time = get_salary_frequency(obj)
-
-                    posted_date = obj.get('datePosted', obj.get('date_posted', 'N/A'))
-                    url = get_url(obj)
-                    remote = get_remote_status(obj)
-
-                    job_tuple = (job_id, job_title, company_name, job_description, location, min_salary, max_salary,
-                                 salary_time, posted_date, url, remote)
-                    DBUtils.insert_job(conn, cursor, job_tuple)
-
+                job_objects = normalize_json_data(data)
+                for obj in job_objects:
+                    job_data = extract_job_data(obj)
+                    DBUtils.insert_job(conn, cursor, job_data)
             except json.JSONDecodeError as e:
-                print("Error decoding JSON:", e)
+                print(f"Error decoding JSON: {e}")
+
+
+def normalize_json_data(data: dict) -> list[dict]:
+    """
+    Normalizes JSON data into a list of job objects.
+
+    :param data: JSON data which might be an array or single object.
+    :return: List of job objects.
+    """
+    if isinstance(data, list):
+        return data
+    elif isinstance(data, dict):
+        return [data]
+    else:
+        print(f"Skipping invalid data structure: {data}")
+        return []
+
+
+def extract_job_data(obj: dict) -> tuple:
+    """
+    Extracts job details from a single job object.
+
+    :param obj: Dictionary containing job data.
+    :return: Tuple formatted for database insertion.
+    """
+    job_id = obj.get('id', 'N/A')
+    job_title = obj.get('title', 'N/A')
+    company_name = obj.get('company', 'N/A')
+    job_description = obj.get('description', 'N/A')
+    location = obj.get('location', 'N/A')
+    min_salary, max_salary = parse_salary(obj)
+    salary_time = get_salary_frequency(obj)
+    posted_date = obj.get('datePosted', obj.get('date_posted', 'N/A'))
+    url = get_url(obj)
+    remote = get_remote_status(obj)
+
+    return (job_id, job_title, company_name, job_description, location, min_salary,
+            max_salary, salary_time, posted_date, url, remote)
 
 
 def get_salary_frequency(job_obj: dict) -> str:
