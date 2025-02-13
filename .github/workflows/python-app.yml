@@ -50,6 +50,7 @@ jobs:
         pwd
         ls -la
     - name: Test with pytest
+      working-directory: StevenSousa_Project_1
       env:
         DB_NAME_TEST: ${{ secrets.DB_NAME_TEST }}
         DB_NAME_DEFAULT: ${{ secrets.DB_NAME_DEFAULT }}
@@ -58,4 +59,4 @@ jobs:
         DB_HOST: ${{ secrets.DB_HOST }}
         DB_PORT: ${{ secrets.DB_PORT }}
       run: |
-        python -m pytest StevenSousa_Project_1/tests/*.py
+        python -m pytest tests/*.py
