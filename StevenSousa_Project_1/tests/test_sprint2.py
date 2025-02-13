@@ -90,7 +90,7 @@ def test_db_ops(db_conn):
 
     # Insert data from test_data.json into new table
     with db_conn.cursor() as cursor:
-        inserted_rows = Data_Processing.process_json('data/test_data.json', db_conn, cursor)
+        inserted_rows = Data_Processing.process_json('tests/data/test_data.json', db_conn, cursor)
         assert inserted_rows == 3, "Incorrect number of rows inserted"
         print("Data inserted successfully.")
 
@@ -168,13 +168,13 @@ def mock_get_remote_status(obj):
 
 @pytest.fixture(scope="module")
 def json_test_data():
-    with open('data/test_data.json', 'r') as f:
+    with open('tests/data/test_data.json', 'r') as f:
         return [json.loads(line) for line in f]
 
 
 @pytest.fixture(scope="module")
 def expected_results():
-    with open('data/expected_results.json', 'r') as f:
+    with open('tests/data/expected_results.json', 'r') as f:
         return json.load(f)
 
 
