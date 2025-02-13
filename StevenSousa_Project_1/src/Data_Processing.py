@@ -9,7 +9,7 @@ This file will parse the json files containing jobs and save them to the DB crea
 # Import dependencies
 import json
 import re
-from . import DBUtils
+from src import DBUtils
 
 
 def process_json(filename: str, conn: DBUtils.Connection, cursor: DBUtils.Cursor) -> None:

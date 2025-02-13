@@ -10,14 +10,14 @@ in order to save each job into a PostgreSQL DB.
 # Import dependencies
 import os
 import dotenv
-import DBUtils
-import Data_Processing
+from src import DBUtils
+from src import Data_Processing
 
 
 def main():
 
     # Load environment variables
-    dotenv.load_dotenv(os.path.join(os.path.dirname(os.getcwd()), '.env'))
+    dotenv.load_dotenv()
 
     # Connect using PostgresSQL default values
     conn_default, cursor_default = DBUtils.open_db(
@@ -55,7 +55,7 @@ def main():
     DBUtils.setup_table(conn, cursor)
 
     # Process data
-    Data_Processing.process_json('../data/rapidResults.json', conn, cursor)
+    Data_Processing.process_json('data/rapidResults.json', conn, cursor)
 
     # # Drop table
     # DBUtils.drop_table(conn, cursor)
