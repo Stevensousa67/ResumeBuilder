@@ -49,12 +49,13 @@ def create_user(cursor: Cursor, username: str, password: str):
     :param password: password for the username
     :return:
     """
-    # Create the user, if it doesn't exist
+    # Check if the user exists
     cursor.execute(sql.SQL("SELECT 1 FROM pg_roles WHERE rolname = %s"), (username,))
     user_exists = cursor.fetchone()
-
     if not user_exists:
-        cursor.execute(sql.SQL("CREATE USER {} WITH PASSWORD %S").format(sql.Identifier(username)), (password,))
+        # Correct usage of %s placeholder for password within SQL.SQL
+        cursor.execute(sql.SQL("CREATE USER {} WITH PASSWORD {}").format(sql.Identifier(username),
+                                                                         sql.Literal(password)))
         print(f'User {username} created successfully.')
     else:
         print(f'User {username} already exists.')
@@ -72,24 +73,11 @@ def create_db(cursor: Cursor, db_name):
     db_exists = cursor.fetchone()
 
     if not db_exists:
-        cursor.execute(sql.SQL("CREATE DATABASE %s"), (db_name,))
+        cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(db_name)))
         cursor.connection.commit()
         print(f'Database {db_name} created successfully.')
     else:
         print(f'Database {db_name} already exists.')
-
-
-def assign_ownership(cursor: Cursor, db_name: str, username: str):
-    """
-    This function will assign ownership of a database to the specified user.
-    :param cursor: cursor to the server
-    :param db_name: database name
-    :param username: owner username
-    :return:
-    """
-
-    cursor.execute(sql.SQL("ALTER DATABASE {} OWNER TO {}").format(sql.Identifier(db_name),
-                                                                   sql.Identifier(username)))
 
 
 def close_db(conn: Connection, cursor: Cursor) -> None:

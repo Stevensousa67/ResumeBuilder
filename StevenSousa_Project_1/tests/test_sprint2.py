@@ -21,18 +21,18 @@ dotenv.load_dotenv()
 
 # Assign environment variables
 DB_NAME_TEST = os.getenv('DB_NAME_TEST')
-DB_NAME_DEFAULT = os.getenv('DB_NAME_DEFAULT')
-DB_USER_DEFAULT = os.getenv('DB_USER_DEFAULT')
-DB_PASSWORD_DEFAULT = os.getenv('DB_PASSWORD_DEFAULT')
-DB_HOST = os.getenv('DB_HOST')
-DB_PORT = os.getenv('DB_PORT')
+GCP_DB_NAME_DEFAULT = os.getenv('GCP_DB_NAME_DEFAULT')
+GCP_DB_USER_DEFAULT = os.getenv('GCP_DB_USER_DEFAULT')
+GCP_DB_PASSWORD_DEFAULT = os.getenv('GCP_DB_PASSWORD_DEFAULT')
+GCP_DB_HOST = os.getenv('GCP_DB_HOST')
+GCP_DB_PORT = os.getenv('GCP_DB_PORT')
 
 
 @pytest.fixture(scope="function")
 def db_conn():
     # Admin connection for database management
     admin_conn = psycopg.connect(
-        f"dbname={DB_NAME_DEFAULT} user={DB_USER_DEFAULT} password={DB_PASSWORD_DEFAULT} host={DB_HOST} port={DB_PORT}"
+        f"dbname={GCP_DB_NAME_DEFAULT} user={GCP_DB_USER_DEFAULT} password={GCP_DB_PASSWORD_DEFAULT} host={GCP_DB_HOST} port={GCP_DB_PORT}"
     )
     admin_conn.autocommit = True  # Enable autocommit to allow CREATE/DROP DATABASE
     try:
@@ -52,25 +52,19 @@ def db_conn():
 
         # Connect to the newly created test database for the test
         conn = psycopg.connect(
-            f"dbname={DB_NAME_TEST} user={DB_USER_DEFAULT} password={DB_PASSWORD_DEFAULT} host={DB_HOST} port={DB_PORT}"
+            f"dbname={DB_NAME_TEST} user={GCP_DB_USER_DEFAULT} password={GCP_DB_PASSWORD_DEFAULT} host={GCP_DB_HOST} port={GCP_DB_PORT}"
         )
         yield conn
     finally:
         # Ensure the test database connection is closed
         if 'conn' in locals() and not conn.closed:
             conn.close()
-
-        # Give a small delay for connection to fully close
-        import time
-        time.sleep(0.5)  # This might not be necessary but can help in some environments
-
         # Cleanup - Drop the test database
         with admin_conn.cursor() as cursor:
             cursor.execute(sql.SQL("DROP DATABASE IF EXISTS {}").format(sql.Identifier(DB_NAME_TEST)))
             cursor.execute("SELECT 1 FROM pg_database WHERE datname = %s", (DB_NAME_TEST,))
             assert cursor.fetchone() is None, f"Database {DB_NAME_TEST} was not dropped"
             print(f"Database {DB_NAME_TEST} dropped successfully.")
-
         admin_conn.close()  # Close admin connection
 
 

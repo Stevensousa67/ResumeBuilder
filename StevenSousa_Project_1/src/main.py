@@ -21,11 +21,11 @@ def main():
 
     # Connect using PostgresSQL default values
     conn_default, cursor_default = DBUtils.open_db(
-        os.getenv('DB_NAME_DEFAULT'),
-        os.getenv('DB_USER_DEFAULT'),
-        os.getenv('DB_PASSWORD_DEFAULT'),
-        os.getenv('DB_HOST'),
-        os.getenv('DB_PORT'),
+        os.getenv('GCP_DB_NAME_DEFAULT'),
+        os.getenv('GCP_DB_USER_DEFAULT'),
+        os.getenv('GCP_DB_PASSWORD_DEFAULT'),
+        os.getenv('GCP_DB_HOST'),
+        os.getenv('GCP_DB_PORT'),
         autocommit=True
     )
 
@@ -35,9 +35,6 @@ def main():
     # Create custom database
     DBUtils.create_db(cursor_default, os.getenv('DB_NAME'))
 
-    # Assign newly created database to new user
-    DBUtils.assign_ownership(cursor_default, os.getenv('DB_NAME'), os.getenv('DB_USER'))
-
     # Close existing connection in order to change databases
     DBUtils.close_db(conn_default, cursor_default)
 
@@ -46,8 +43,8 @@ def main():
         os.getenv('DB_NAME'),
         os.getenv('DB_USER'),
         os.getenv('DB_PASSWORD'),
-        os.getenv('DB_HOST'),
-        os.getenv('DB_PORT'),
+        os.getenv('GCP_DB_HOST'),
+        os.getenv('GCP_DB_PORT'),
         autocommit=False
     )
 
@@ -55,10 +52,16 @@ def main():
     DBUtils.setup_table(conn, cursor)
 
     # Process data
+    print("\nInserting data from rapid_jobs2 to cloud database, please wait...")
+    Data_Processing.process_json('data/rapid_jobs2.json', conn, cursor)
+    print("Data from rapid_jobs2.json inserted successfully.")
+    print("\nInserting data from rapidResults.json to cloud database, please wait...")
     Data_Processing.process_json('data/rapidResults.json', conn, cursor)
+    print("Data from rapidResults.json inserted successfully.")
 
     # # Drop table
     # DBUtils.drop_table(conn, cursor)
+    # print("Table dropped successfully.")
 
     # Exit program
     print('Program finished successfully.')
