@@ -73,6 +73,7 @@ def create_db(cursor: Cursor, db_name):
 
     if not db_exists:
         cursor.execute(sql.SQL("CREATE DATABASE %s"), (db_name,))
+        cursor.connection.commit()
         print(f'Database {db_name} created successfully.')
     else:
         print(f'Database {db_name} already exists.')
