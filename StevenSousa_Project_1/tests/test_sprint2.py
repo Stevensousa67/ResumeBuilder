@@ -32,7 +32,8 @@ GCP_DB_PORT = os.getenv('GCP_DB_PORT')
 def db_conn():
     # Admin connection for database management
     admin_conn = psycopg.connect(
-        f"dbname={GCP_DB_NAME_DEFAULT} user={GCP_DB_USER_DEFAULT} password={GCP_DB_PASSWORD_DEFAULT} host={GCP_DB_HOST} port={GCP_DB_PORT}"
+        f"dbname={GCP_DB_NAME_DEFAULT} user={GCP_DB_USER_DEFAULT} password={GCP_DB_PASSWORD_DEFAULT} "
+        f"host={GCP_DB_HOST} port={GCP_DB_PORT}"
     )
     admin_conn.autocommit = True  # Enable autocommit to allow CREATE/DROP DATABASE
     try:
@@ -52,7 +53,8 @@ def db_conn():
 
         # Connect to the newly created test database for the test
         conn = psycopg.connect(
-            f"dbname={DB_NAME_TEST} user={GCP_DB_USER_DEFAULT} password={GCP_DB_PASSWORD_DEFAULT} host={GCP_DB_HOST} port={GCP_DB_PORT}"
+            f"dbname={DB_NAME_TEST} user={GCP_DB_USER_DEFAULT} password={GCP_DB_PASSWORD_DEFAULT} "
+            f"host={GCP_DB_HOST} port={GCP_DB_PORT}"
         )
         yield conn
     finally:
