@@ -26,14 +26,14 @@ jobs:
     - name: Start PostgreSQL service
       run: |
         sudo systemctl start postgresql.service
-    - name: Configure PostgreSQL
-      run: |
-        sudo -u postgres psql -c "CREATE DATABASE ${{ env.DB_NAME_TEST }};"
-        sudo -u postgres psql -c "CREATE USER ${{ env.DB_USER_DEFAULT }} WITH PASSWORD '${{ env.DB_PASSWORD_DEFAULT }}';"
-        sudo -u postgres psql -c "ALTER ROLE ${{ env.DB_USER_DEFAULT }} SET client_encoding TO 'utf8';"
-        sudo -u postgres psql -c "ALTER ROLE ${{ env.DB_USER_DEFAULT }} SET default_transaction_isolation TO 'read committed';"
-        sudo -u postgres psql -c "ALTER ROLE ${{ env.DB_USER_DEFAULT }} SET timezone TO 'UTC';"
-        sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE ${{ env.DB_NAME_TEST }} TO ${{ env.DB_USER_DEFAULT }};"
+#    - name: Configure PostgreSQL
+#      run: |
+#        sudo -u postgres psql -c "CREATE DATABASE ${{ env.DB_NAME_TEST }};"
+#        sudo -u postgres psql -c "CREATE USER ${{ env.DB_USER_DEFAULT }} WITH PASSWORD '${{ env.DB_PASSWORD_DEFAULT }}';"
+#        sudo -u postgres psql -c "ALTER ROLE ${{ env.DB_USER_DEFAULT }} SET client_encoding TO 'utf8';"
+#        sudo -u postgres psql -c "ALTER ROLE ${{ env.DB_USER_DEFAULT }} SET default_transaction_isolation TO 'read committed';"
+#        sudo -u postgres psql -c "ALTER ROLE ${{ env.DB_USER_DEFAULT }} SET timezone TO 'UTC';"
+#        sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE ${{ env.DB_NAME_TEST }} TO ${{ env.DB_USER_DEFAULT }};"
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
