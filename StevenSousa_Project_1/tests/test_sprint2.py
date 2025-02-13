@@ -103,7 +103,8 @@ def test_db_ops(db_conn):
 
         # Print the table header (assuming you know the column names)
         print(
-            "Job ID | Title | Company | Description | Location | Min Salary | Max Salary | Salary Time | Posted Date | URL | Remote")
+            "Job ID | Title | Company | Description | Location | Min Salary | Max Salary | Salary Time | Posted Date "
+            "| URL | Remote")
         print("-" * 150)  # Just to create a separator line
 
         # Print each row
