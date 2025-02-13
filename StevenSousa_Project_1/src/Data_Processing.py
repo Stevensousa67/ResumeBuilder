@@ -22,6 +22,7 @@ def process_json(filename: str, conn: DBUtils.Connection, cursor: DBUtils.Cursor
     :param cursor: Database cursor.
     :return: None
     """
+    insert_count = 0
     with open(filename, 'r') as file:
         for line in file:
             try:
@@ -30,8 +31,10 @@ def process_json(filename: str, conn: DBUtils.Connection, cursor: DBUtils.Cursor
                 for obj in job_objects:
                     job_data = extract_job_data(obj)
                     DBUtils.insert_job(conn, cursor, job_data)
+                    insert_count += 1
             except json.JSONDecodeError as e:
                 print(f"Error decoding JSON: {e}")
+    return insert_count
 
 
 def normalize_json_data(data: dict) -> list[dict]:
