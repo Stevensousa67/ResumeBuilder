@@ -1,6 +1,7 @@
 # Program Objectives
 - Programmatically parse through the rapid_jobs2.json and rapidResults.json files
-- Save parsed json objects to DB (PostgreSQL)
+- Save parsed json objects to Google Cloud Provider PostgreSQL 14 database.
+- If you want to use a local DB, simply change the GCP_DB_HOST variable in .env to "localhost" and follow the instructions below.
 
 # Dependencies (reference requirements.txt for libraries)
 - PostgreSQL 14, Python 3.9+, dotenv, psycopg, pytest, pytest-mock
