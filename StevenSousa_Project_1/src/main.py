@@ -32,8 +32,8 @@ def main():
     # Connect using localhost PostgresSQL default values
     conn_default, cursor_default = DBUtils.open_db(
         os.getenv('DB_NAME_DEFAULT'),
-        os.getenv('DB_USER'),
-        os.getenv('DB_PASSWORD'),
+        os.getenv('DB_USER_DEFAULT'),
+        os.getenv('DB_PASSWORD_DEFAULT'),
         os.getenv('DB_HOST_DEFAULT'),
         os.getenv('DB_PORT_DEFAULT'),
         autocommit=True
