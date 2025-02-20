@@ -79,7 +79,6 @@ def main():
     Data_Processing.process_json('data/rapid_jobs2.json', conn, cursor)
     print("Data from rapid_jobs2.json inserted successfully.")
 
-
     # # Drop table
     # DBUtils.drop_table(conn, cursor)
     # print("Table dropped successfully.")
