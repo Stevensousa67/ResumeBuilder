@@ -1,156 +1,163 @@
+
 """
 Author: Steven Sousa
 Prof.: John Santore
 Institution: Bridgewater State University - COMP490 - Senior Design & Development
 Version: 06Feb2025
 
-This program handles the creation of the PostgreSQL database utilized in Sprint 2. If a db already exists, it will do
- noting. Additionally, if a job_id already exists in the database, it won't add it again.
+This file will parse the json files containing jobs and save them to the DB created in main.py
 """
-from typing import Tuple
+# Import dependencies
+import json
+import re
+from src import DBUtils
 
-from psycopg import DatabaseError, Connection, Cursor, connect, sql
 
-
-def open_db(dbname: str, user: str, password: str, host: str, port: str, autocommit: bool = False) -> (
-        Tuple)[Connection, Cursor]:
+def process_json(filename: str, conn: DBUtils.Connection, cursor: DBUtils.Cursor) -> None:
     """
-    This function will open a connection to the PostgreSQL database.
-    :param dbname: os.getenv('DB_NAME')
-    :param user: os.getenv('DB_USER')
-    :param password: os.getenv('DB_PASSWORD')
-    :param host: os.getenv('DB_HOST')
-    :param port: os.getenv('DB_PORT')
-    :param autocommit: True if you want to save changes automatically
-    :return: connection and cursor to the database
-    """
-    try:
-        conn = connect(
-            dbname=dbname,
-            user=user,
-            password=password,
-            host=host,
-            port=port
-        )
-        conn.autocommit = autocommit
-        cursor = conn.cursor()
-        return conn, cursor
+    Parses job data from JSON files and saves it to the database.
+    Handles both array-of-objects and object-per-line JSON formats.
 
-    except (Exception, DatabaseError) as error:
-        print(error)
-        raise error
+    :param filename: JSON file containing jobs.
+    :param conn: Database connection.
+    :param cursor: Database cursor.
+    :return: None
+    """
+    insert_count = 0
+    with open(filename, 'r') as file:
+        for line in file:
+            try:
+                data = json.loads(line.strip())
+                job_objects = normalize_json_data(data)
+                for obj in job_objects:
+                    job_data = extract_job_data(obj)
+                    DBUtils.insert_job(conn, cursor, job_data)
+                    insert_count += 1
+            except json.JSONDecodeError as e:
+                print(f"Error decoding JSON: {e}")
+    return insert_count
 
 
-def create_user(cursor: Cursor, username: str, password: str):
+def normalize_json_data(data: dict) -> list[dict]:
     """
-    This function will create a user in the PostgreSQL server
-    :param cursor: cursor to the server
-    :param username: username for the server
-    :param password: password for the username
-    :return:
+    Normalizes JSON data into a list of job objects.
+
+    :param data: JSON data which might be an array or single object.
+    :return: List of job objects.
     """
-    # Check if the user exists
-    cursor.execute(sql.SQL("SELECT 1 FROM pg_roles WHERE rolname = %s"), (username,))
-    user_exists = cursor.fetchone()
-    if not user_exists:
-        # Correct usage of %s placeholder for password within SQL.SQL
-        cursor.execute(sql.SQL("CREATE USER {} WITH PASSWORD {}").format(sql.Identifier(username),
-                                                                         sql.Literal(password)))
-        print(f'User {username} created successfully.')
+    if isinstance(data, list):
+        return data
+    elif isinstance(data, dict):
+        return [data]
     else:
-        print(f'User {username} already exists.')
+        print(f"Skipping invalid data structure: {data}")
+        return []
 
 
-def create_db(cursor: Cursor, db_name):
+def extract_job_data(obj: dict) -> tuple:
     """
-    This function will create a database in the PostgreSQL server
-    :param cursor: cursor to the server
-    :param db_name: name of the database
-    :return:
+    Extracts job details from a single job object.
+
+    :param obj: Dictionary containing job data.
+    :return: Tuple formatted for database insertion.
+    """
+    job_id = obj.get('id', 'N/A')
+    job_title = obj.get('title', 'N/A')
+    company_name = obj.get('company', 'N/A')
+    job_description = obj.get('description', 'N/A')
+    location = obj.get('location', 'N/A')
+    min_salary, max_salary = parse_salary(obj)
+    salary_time = get_salary_frequency(obj)
+    posted_date = obj.get('datePosted', obj.get('date_posted', 'N/A'))
+    url = get_url(obj)
+    remote = get_remote_status(obj)
+
+    return (job_id, job_title, company_name, job_description, location, min_salary,
+            max_salary, salary_time, posted_date, url, remote)
+
+
+def get_salary_frequency(job_obj: dict) -> str:
+    """
+    This function returns the salary frequency for a given job object. Default return is 'yearly'.
+    :param job_obj:
+    :return: salary_frequency
     """
 
-    cursor.execute(sql.SQL("SELECT 1 FROM pg_database WHERE datname = %s"), (db_name,))
-    db_exists = cursor.fetchone()
+    if 'salaryRange' in job_obj:
+        if 'hour' in job_obj['salaryRange']:
+            return 'hourly'
+        elif 'year' in job_obj['salaryRange'] or job_obj['salaryRange'] == '':
+            return 'yearly'
+    elif 'interval' in job_obj:
+        return 'yearly' if job_obj['interval'] == '' else job_obj['interval']
+    return 'yearly'
 
-    if not db_exists:
-        cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(db_name)))
-        cursor.connection.commit()
-        print(f'Database {db_name} created successfully.')
+
+def convert_salary(salary: str) -> int:
+    """Converts a salary string to an integer, handling empty strings, None, and non-numeric values.
+    :param salary: Salary to be converted.
+    :return: Converted salary.
+    """
+
+    if salary != '':
+        return int(float(salary))
     else:
-        print(f'Database {db_name} already exists.')
+        return 0
 
 
-def close_db(conn: Connection, cursor: Cursor) -> None:
+def parse_salary(job_obj: dict) -> tuple:
     """
-    This function will save any changes to the database and close the connection.
-    :param conn: connection to the database
-    :param cursor: cursor to the database
-    :return: None
+    Parses salary information from a job object. LLM Generated function
+    :param job_obj:
+    :return: Tuple (min_salary, max_salary)
     """
-    conn.commit()
-    cursor.close()
-    conn.close()
+
+    if 'min_amount' in job_obj and 'max_amount' in job_obj:
+        min_salary = convert_salary(job_obj['min_amount'])
+        max_salary = convert_salary(job_obj['max_amount'])
+        return min_salary, max_salary
+
+    salary_range = job_obj.get('salaryRange', '')
+    if salary_range:
+        numbers = re.findall(r'[\d,]+K?|\d+', salary_range)
+        salaries = []
+        for num in numbers:
+            num = num.replace(',', '')
+            if num.endswith('K'):
+                salaries.append(int(float(num[:-1]) * 1000))
+            else:
+                salaries.append(int(num))
+
+        if len(salaries) == 2:
+            return salaries[0], salaries[1]
+        elif len(salaries) == 1:
+            return salaries[0], salaries[0]
+
+    return 0, 0
 
 
-def setup_table(conn: Connection, cursor: Cursor) -> None:
+def get_url(job_obj: dict):
+    """Extracts the URL from a job object, handling different key names.
+    :param job_obj: Job object.
+    :return: URL.
     """
-    This function will create the jobs table if it doesn't already exist
-    :param cursor: connection to the database
-    :param conn: cursor to the database
-    :return: None
-    """
-    cursor.execute(sql.SQL(
-        """CREATE TABLE IF NOT EXISTS jobs(
-        job_id TEXT PRIMARY KEY,
-        job_title TEXT NOT NULL,
-        company_name TEXT NOT NULL,
-        job_description TEXT NOT NULL,
-        location TEXT NOT NULL,
-        min_salary DECIMAL DEFAULT 0,
-        max_salary DECIMAL DEFAULT 0,
-        salary_time TEXT DEFAULT 'yearly',
-        posted_date TEXT,
-        url TEXT NOT NULL,
-        remote BOOLEAN DEFAULT FALSE);"""
-    ))
-    conn.commit()
+
+    if 'jobProviders' in job_obj:
+        job_providers = job_obj.get('jobProviders', [])
+        return job_providers[0].get('url', 'URL Not Found') if job_providers else 'URL Not Found'
+    elif 'job_url' in job_obj:
+        return job_obj.get('job_url', 'URL Not Found')
+    return 'URL Not Found'
 
 
-def insert_job(conn: Connection, cursor: Cursor, job_tuple: Tuple) -> None:
+def get_remote_status(job_obj: dict):
+    """Determines the remote status from a job object.
+    :param job_obj: Job object.
+    :return: Remote status.
     """
-    Inserts a job into the jobs table.
-    :param cursor: cursor to the database
-    :param conn: connection to the database
-    :param job_tuple: job_tuple: Tuple containing job details
-    :return: None
-    """
-    cursor.execute(sql.SQL(
-        """INSERT INTO jobs
-        (job_id, job_title, company_name, job_description, location, min_salary, max_salary, salary_time, posted_date,
-         url, remote)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        ON CONFLICT (job_id) DO NOTHING;
-    """), job_tuple)
-    conn.commit()
 
-
-def drop_table(conn: Connection, cursor: Cursor) -> None:
-    """ This function will drop the job table in the DB.
-    :param cursor: cursor to the database
-    :param conn: connection to the database
-    :return: None
-    """
-    cursor.execute(sql.SQL("""DROP TABLE IF EXISTS jobs RESTRICT;"""))
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-
-def retrieve_job(cursor: Cursor) -> Tuple:
-    """
-    This function will retrieve a job from the DB.
-    :param cursor: cursor to the database
-    :return: job
-    """
-    cursor.execute(sql.SQL("""SELECT * FROM jobs WHERE job_id = %s"""))
-    return cursor.fetchone()
+    if 'is_remote' in job_obj:
+        return False if job_obj['is_remote'] == '' else job_obj['is_remote']
+    elif 'location' in job_obj:
+        return True if 'remote' in job_obj['location'].lower() or 'remote' in job_obj['title'] else False
+    return False
