@@ -31,3 +31,18 @@
   credentials
 - Program will then parse the json files located in StevenSousa_Project_1/data and save their contents in the database
 - Upon saving all jobs in the files, the program will then close.
+
+# Sprint 3
+- First, start the PostgreSQL server. This project utilizes PostgreSQL v14, therefore if you have any newer versions,
+  you will be all set. If not, please download at least v14.
+- Place the .env file inside the StevenSousa_Project_1 folder.
+- If your default PostgreSQL credentials are not "postgres", then make sure to update lines 11-13 in .env to your local setup. It is CRUCIAL that this project connects to your local PostgreSQL server.
+- Create a .venv inside StevenSousa_Project_1/
+- In your terminal, navigate to the StevenSousa_Project_1 folder and start the .venv by running the command "source
+  .venv/bin/activate"
+- Still in your terminal but now with the .venv activated, install the dependencies by running the command "pip install -r requirements.txt"
+- cd into ResumeBuilder/ and run the command "python manage.py ensure_db". This will connect to your local PostgreSQL server and check if DB_NAME, DB_USER exists in the server. If not, it will create them and assign DB_PASSWORD to the new user.
+- Create Django managed tables by running "python manage.py migrate"
+- Add json jobs into Django managed table by running the command "python manage.py Data_Processing"
+- Create a Django superuser by running the command "python manage.py createsuperuser" and follow the terminal instructions
+- Start the Django server by running the command "python manage.py runserver"
