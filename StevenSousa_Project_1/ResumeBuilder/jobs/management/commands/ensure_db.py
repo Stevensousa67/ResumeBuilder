@@ -42,14 +42,15 @@ class Command(BaseCommand):
                 user=db_user_default,
                 password=db_password_default,
                 host=db_host,
-                port=db_port
+                port=db_port,
+                autocommit=True
             ) as conn:
                 with conn.cursor() as cursor:
                     # Check if custom db exists in server
                     cursor.execute("""SELECT 1 FROM pg_database WHERE datname = %s;""", (db_name,))
                     if not cursor.fetchone():
                         # Create the database in the server
-                        cursor.execute("""CREATE DATABASE %s;""", (db_name,))
+                        cursor.execute(f"CREATE DATABASE {db_name};")
                         self.stdout.write(self.style.SUCCESS(f"Database '{db_name}' created successfully."))
                     else:
                         self.stdout.write(self.style.SUCCESS(f"Database '{db_name}' already exists."))
@@ -58,7 +59,7 @@ class Command(BaseCommand):
                     cursor.execute("""SELECT 1 FROM pg_roles WHERE rolname = %s;""", (db_user,))
                     if not cursor.fetchone():
                         # Create the user in the server
-                        cursor.execute("""CREATE USER %s WITH PASSWORD %s;""", (db_user, db_password))
+                        cursor.execute(f"CREATE USER {db_user} WITH PASSWORD '{db_password}';")
                         self.stdout.write(self.style.SUCCESS(f"User '{db_user}' created successfully."))
                     else:
                         self.stdout.write(self.style.SUCCESS(f"User '{db_user}' already exists."))

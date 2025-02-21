@@ -112,19 +112,19 @@ class Project(models.Model):
         return f"{self.title} - {self.candidate}"
 
 
-# Classes model - For candidate classes
-class Classes(models.Model):
+# Course model - For candidate classes
+class Course(models.Model):
     candidate = models.ForeignKey(
         Candidate,
         on_delete=models.CASCADE,
-        related_name='classes'
+        related_name='courses'
     )
-    class_name = models.CharField(max_length=200, blank=False, null=False)
+    course_name = models.CharField(max_length=200, blank=False, null=False)
 
     class Meta:
-        db_table = 'django_classes'
-        verbose_name = 'Classes'
-        verbose_name_plural = 'Classes'
+        db_table = 'django_course'
+        verbose_name = 'Course'
+        verbose_name_plural = 'Courses'
 
     def __str__(self):
-        return f"{self.class_name} - {self.candidate}"
+        return f"{self.course_name} - {self.candidate}"

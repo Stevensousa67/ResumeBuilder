@@ -1,5 +1,5 @@
 from django import forms
-from .models import Candidate, Reference, Project, Experience, Classes
+from .models import Candidate, Reference, Project, Experience, Course
 
 # Candidate Form
 class CandidateForm(forms.ModelForm):
@@ -19,17 +19,18 @@ class CandidateForm(forms.ModelForm):
             'skills': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
+
     def clean_phone(self):
         phone = self.cleaned_data['phone']
         if not phone.replace('-', '').replace(' ', '').replace('(', '').replace(')', '').isdigit():
             raise forms.ValidationError("Phone number must contain only digits.")
         return phone
 
+
     def clean_email(self):
         email = self.cleaned_data['email']
-        if '@' not in email:
-            raise forms.ValidationError("Email must contain an '@' symbol.")
         return email.lower()
+
 
 # Reference Form
 class ReferenceForm(forms.ModelForm):
@@ -44,17 +45,18 @@ class ReferenceForm(forms.ModelForm):
             'relationship': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
+
     def clean_phone(self):
         phone = self.cleaned_data['phone']
-        if not phone.replace('-', '').replace(' ', '').replace('(', '').replace(')', '').isdigit():
+        if phone and not phone.replace('-', '').replace(' ', '').replace('(', '').replace(')', '').isdigit():
             raise forms.ValidationError("Phone number must contain only digits.")
         return phone
 
+
     def clean_email(self):
         email = self.cleaned_data['email']
-        if '@' not in email:
-            raise forms.ValidationError("Email must contain an '@' symbol.")
-        return email.lower()
+        return email.lower() if email else email  # Skip if empty
+
 
 # Project Form
 class ProjectForm(forms.ModelForm):
@@ -66,11 +68,18 @@ class ProjectForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
+
 # Experience Form
 class ExperienceForm(forms.ModelForm):
+    present = forms.BooleanField(
+        required=False,
+        label="I currently work here",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+
     class Meta:
         model = Experience
-        fields = ['title', 'company', 'start_date', 'end_date', 'description']
+        fields = ['title', 'company', 'start_date', 'end_date', 'description', 'present']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'company': forms.TextInput(attrs={'class': 'form-control'}),
@@ -79,11 +88,26 @@ class ExperienceForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
-# Classes Form
-class ClassesForm(forms.ModelForm):
+    def clean(self):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get('start_date')
+        end_date = cleaned_data.get('end_date')
+        present = cleaned_data.get('present')
+
+        if present and end_date:
+            raise forms.ValidationError("You cannot have both an end date and mark the job as present.")
+
+        if start_date and end_date and end_date < start_date:
+            raise forms.ValidationError("End date cannot be earlier than start date.")
+
+        return cleaned_data
+
+
+# Courses Form
+class CourseForm(forms.ModelForm):
     class Meta:
-        model = Classes
-        fields = ['class_name']
+        model = Course
+        fields = ['course_name']
         widgets = {
-            'class_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'course_name': forms.TextInput(attrs={'class': 'form-control'}),
         }
