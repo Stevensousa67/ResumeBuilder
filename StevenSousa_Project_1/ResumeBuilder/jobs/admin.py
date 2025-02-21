@@ -6,3 +6,7 @@ from .models import Job
 class JobAdmin(admin.ModelAdmin):
     list_display = ('job_id', 'job_title', 'company_name', 'location', 'min_salary','max_salary', 'salary_time',
                     'posted_date', 'url', 'remote')
+    search_fields = ('job_id', 'job_title', 'company_name', 'location', 'min_salary','max_salary', 'salary_time',
+                    'posted_date', 'url', 'remote')
+    list_filter = ('job_title', 'company_name', 'location',)
+
