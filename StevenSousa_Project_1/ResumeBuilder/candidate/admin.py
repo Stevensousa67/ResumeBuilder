@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Candidate, Reference, Project, Experience, Course
+from .models import Candidate, Reference, Project, Experience
 
 # Register your models here.
 @admin.register(Candidate)
@@ -29,10 +29,3 @@ class ExperienceAdmin(admin.ModelAdmin):
     list_display = ('title', 'company', 'start_date', 'end_date')
     search_fields = ('title', 'company', 'start_date', 'end_date')
     list_filter = ('company',)
-
-
-@admin.register(Course)
-class CourseAdmin(admin.ModelAdmin):
-    list_display = ('course_name',)
-    search_fields = ('course_name',)
-    list_filter = ('course_name',)

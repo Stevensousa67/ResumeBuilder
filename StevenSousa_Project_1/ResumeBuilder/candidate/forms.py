@@ -1,11 +1,12 @@
 from django import forms
-from .models import Candidate, Reference, Project, Experience, Course
+from .models import Candidate, Reference, Project, Experience
 
 # Candidate Form
 class CandidateForm(forms.ModelForm):
     class Meta:
         model = Candidate
-        fields = ['first_name', 'last_name', 'email', 'phone', 'address', 'education', 'major', 'minor', 'gpa', 'skills']
+        fields = ['first_name', 'last_name', 'email', 'phone', 'address', 'education', 'major', 'minor', 'gpa',
+                  'skills', 'courses']
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
@@ -17,6 +18,7 @@ class CandidateForm(forms.ModelForm):
             'minor': forms.TextInput(attrs={'class': 'form-control'}),
             'gpa': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'max': '4.0'}),
             'skills': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'courses': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
 
@@ -42,7 +44,7 @@ class ReferenceForm(forms.ModelForm):
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'relationship': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'relationship': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
 
@@ -55,7 +57,7 @@ class ReferenceForm(forms.ModelForm):
 
     def clean_email(self):
         email = self.cleaned_data['email']
-        return email.lower() if email else email  # Skip if empty
+        return email.lower() if email else email
 
 
 # Project Form
@@ -101,13 +103,3 @@ class ExperienceForm(forms.ModelForm):
             raise forms.ValidationError("End date cannot be earlier than start date.")
 
         return cleaned_data
-
-
-# Courses Form
-class CourseForm(forms.ModelForm):
-    class Meta:
-        model = Course
-        fields = ['course_name']
-        widgets = {
-            'course_name': forms.TextInput(attrs={'class': 'form-control'}),
-        }

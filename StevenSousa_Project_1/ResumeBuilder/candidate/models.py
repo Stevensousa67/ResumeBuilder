@@ -15,6 +15,9 @@ class Candidate(models.Model):
         max_length=50,
         choices=[
             ('HS', 'High School'),
+            ('GED', 'GED'),
+            ('CERT', 'Certificate'),
+            ('AA', 'Associate\'s'),
             ('BA', 'Bachelor\'s'),
             ('MA', 'Master\'s'),
             ('PHD', 'Ph.D.'),
@@ -32,7 +35,7 @@ class Candidate(models.Model):
         help_text="Enter GPA (e.g., 3.50)"
     )
     skills = models.TextField(blank=True, null=True)
-
+    courses = models.TextField(blank=True, null=True)
 
 
     class Meta:
@@ -77,12 +80,7 @@ class Reference(models.Model):
     last_name = models.CharField(max_length=100, blank=False, null=False)
     email = models.EmailField(blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
-    relationship = models.TextField(
-        max_length=1000,
-        blank=True,
-        null=True,
-        help_text="Relationship of reference to candidate"
-    )
+    relationship = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
         db_table = 'django_reference'
@@ -110,21 +108,3 @@ class Project(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.candidate}"
-
-
-# Course model - For candidate classes
-class Course(models.Model):
-    candidate = models.ForeignKey(
-        Candidate,
-        on_delete=models.CASCADE,
-        related_name='courses'
-    )
-    course_name = models.CharField(max_length=200, blank=False, null=False)
-
-    class Meta:
-        db_table = 'django_course'
-        verbose_name = 'Course'
-        verbose_name_plural = 'Courses'
-
-    def __str__(self):
-        return f"{self.course_name} - {self.candidate}"
