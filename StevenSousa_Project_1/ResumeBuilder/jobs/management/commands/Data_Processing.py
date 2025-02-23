@@ -123,10 +123,19 @@ class Command(BaseCommand):
             return job_obj.get('job_url', 'URL Not Found')
         return 'URL Not Found'
 
-
     def get_remote_status(self, job_obj):
+        # Check title first, regardless of other fields
+        title = job_obj.get('title', '')
+        if title and 'remote' in title.lower():
+            return True
+
+        # Then check explicit is_remote
         if 'is_remote' in job_obj:
             return False if job_obj['is_remote'] == '' else job_obj['is_remote']
-        elif 'location' in job_obj:
-            return True if 'remote' in job_obj['location'].lower() or 'remote' in job_obj['title'] else False
+
+        # Finally check location
+        location = job_obj.get('location', '')
+        if location and 'remote' in location.lower():
+            return True
+
         return False
