@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Home</title>
-</head>
-<body>
-    <h1>Placeholder</h1>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<h1>Resume Builder</h1>
+<p class="lead">Welcome to Resume Builder! <br> Jump right in to explore job openings, build your own profile, and have
+    Google Gemini craft a resume tailored specifically for your selected job description.</p>
+<a class="btn btn-lg btn-secondary font-weight-bold bg-white" href="#">See Job Openings</a>
+{% endblock %}
