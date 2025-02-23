@@ -51,7 +51,7 @@ def signup(request):
                     experience.save()
 
             messages.success(request, "Signup successful! Your profile has been created.")
-            return redirect('job:index')
+            return redirect('jobs:index')
         else:
             # Log errors for debugging
             print("Candidate Errors:", candidate_form.errors)
