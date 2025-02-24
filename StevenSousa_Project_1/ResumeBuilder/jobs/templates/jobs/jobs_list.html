@@ -4,7 +4,7 @@
 {% block title %}Jobs{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'jobs/jobs.css' %}">
+    <link rel="stylesheet" href="{% static 'jobs/jobs_list.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -20,67 +20,75 @@
             </div>
         {% endif %}
 
-        <h1 class="jobs-title">Jobs</h1>
-        <div class="table-wrapper flex-grow-1 overflow-auto">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Position</th>
-                        <th>Company</th>
-                        <th>Location</th>
-                        <th>Description</th>
-                        <th>Remote?</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for job in jobs %}
-                    <tr>
-                        <td><a href="{% url 'jobs:job_details' job.job_id %}">{{ job.job_title }}</a></td>
-                        <td>{{ job.company_name }}</td>
-                        <td>{{ job.location }}</td>
-                        {% if job.job_description|length > 300 %}
-                        <td>{{ job.job_description|slice:":300" }} <a href="{% url 'jobs:job_details' job.job_id %}">Read More</a></td>
+        <div class="card mb-3 mt-3 flex-grow-1">
+            <div class="card-header">
+                <h1 class="jobs-title card-title mb-0">Jobs</h1>
+            </div>
+            <div class="card-body p-0 flex-grow-1 d-flex flex-column"> <!-- Flex for internal layout -->
+                <div class="table-wrapper flex-grow-1 overflow-auto">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Position</th>
+                                <th>Company</th>
+                                <th>Location</th>
+                                <th>Description</th>
+                                <th>Remote?</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for job in jobs %}
+                            <tr>
+                                <td><a href="{% url 'jobs:job_details' job.job_id %}">{{ job.job_title }}</a></td>
+                                <td>{{ job.company_name }}</td>
+                                <td>{{ job.location }}</td>
+                                {% if job.job_description|length > 300 %}
+                                <td>{{ job.job_description|slice:":300" }} <a href="{% url 'jobs:job_details' job.job_id %}">Read More</a></td>
+                                {% else %}
+                                <td>{{ job.job_description }}</td>
+                                {% endif %}
+                                <td>{{ job.remote|yesno:"Yes,No" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5">No jobs available at this time.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% if jobs.has_other_pages %}
+            <div class="card-footer">
+                <nav aria-label="Page navigation" class="pagination-container">
+                    <ul class="pagination justify-content-center mb-0">
+                        {% if jobs.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page=1">« First</a></li>
+                        <li class="page-item"><a class="page-link" href="?page={{ jobs.previous_page_number }}">Previous</a></li>
                         {% else %}
-                        <td>{{ job.job_description }}</td>
+                        <li class="page-item disabled"><span class="page-link">« First</span></li>
+                        <li class="page-item disabled"><span class="page-link">Previous</span></li>
                         {% endif %}
-                        <td>{{ job.remote|yesno:"Yes,No" }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5">No jobs available at this time.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+                        {% for num in jobs.paginator.page_range %}
+                        {% if jobs.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > jobs.number|add:'-3' and num < jobs.number|add:'3' %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if jobs.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ jobs.next_page_number }}">Next</a></li>
+                        <li class="page-item"><a class="page-link" href="?page={{ jobs.paginator.num_pages }}">Last »</a></li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Next</span></li>
+                        <li class="page-item disabled"><span class="page-link">Last »</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
         </div>
-        {% if jobs.has_other_pages %}
-        <nav aria-label="Page navigation" class="pagination-container mt-2">
-            <ul class="pagination justify-content-center mb-0">
-                {% if jobs.has_previous %}
-                <li class="page-item"><a class="page-link" href="?page=1">« First</a></li>
-                <li class="page-item"><a class="page-link" href="?page={{ jobs.previous_page_number }}">Previous</a></li>
-                {% else %}
-                <li class="page-item disabled"><span class="page-link">« First</span></li>
-                <li class="page-item disabled"><span class="page-link">Previous</span></li>
-                {% endif %}
-
-                {% for num in jobs.paginator.page_range %}
-                {% if jobs.number == num %}
-                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                {% elif num > jobs.number|add:'-3' and num < jobs.number|add:'3' %}
-                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-                {% endif %}
-                {% endfor %}
-
-                {% if jobs.has_next %}
-                <li class="page-item"><a class="page-link" href="?page={{ jobs.next_page_number }}">Next</a></li>
-                <li class="page-item"><a class="page-link" href="?page={{ jobs.paginator.num_pages }}">Last »</a></li>
-                {% else %}
-                <li class="page-item disabled"><span class="page-link">Next</span></li>
-                <li class="page-item disabled"><span class="page-link">Last »</span></li>
-                {% endif %}
-            </ul>
-        </nav>
-        {% endif %}
     </div>
 {% endblock %}

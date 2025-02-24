@@ -1,28 +1,38 @@
-/* static/jobs/jobs.css */
 .jobs-container {
-    height: 100%; /* Fills <main> height */
+    height: 100%; /* Fills viewport height */
 }
 
 .jobs-title {
-    margin-bottom: 1rem; /* Space below title */
+    margin-bottom: 0;
+}
+
+.card {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    height: 100%; /* Ensure card fills available space */
+    display: flex;
+    flex-direction: column;
+}
+
+.card-body {
+    flex-grow: 1; /* Allows body to expand */
+    display: flex;
+    flex-direction: column;
 }
 
 .table-wrapper {
-    max-height: calc(100vh - 250px); /* Adjust for header, footer, title, and pagination */
+    flex-grow: 1; /* Table takes remaining space */
     overflow-y: auto; /* Scrollable table */
-}
-
-.table {
-    width: 100%;
-    margin-bottom: 0; /* No extra margin at bottom */
+    max-height: calc(100vh - 250px); /* Adjust for header, footer, etc. */
 }
 
 .table thead th {
     position: sticky;
     top: 0;
-    background: #343a40; /* Matches bg-dark */
+    background: #343a40;
     color: white;
-    z-index: 1; /* Keeps header above scrolling body */
+    z-index: 1;
 }
 
 .pagination-container {
