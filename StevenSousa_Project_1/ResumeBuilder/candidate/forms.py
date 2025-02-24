@@ -1,4 +1,5 @@
 from django import forms
+from django.forms import formset_factory
 from .models import Candidate, Reference, Project, Experience
 
 # Candidate Form
@@ -103,3 +104,9 @@ class ExperienceForm(forms.ModelForm):
             raise forms.ValidationError("End date cannot be earlier than start date.")
 
         return cleaned_data
+
+
+# Formsets
+ExperienceFormSet = formset_factory(ExperienceForm, extra=1, can_delete=True)
+ProjectFormSet = formset_factory(ProjectForm, extra=1, can_delete=True)
+ReferenceFormSet = formset_factory(ReferenceForm, extra=1, can_delete=True)

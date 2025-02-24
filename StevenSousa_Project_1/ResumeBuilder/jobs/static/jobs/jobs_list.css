@@ -1,0 +1,30 @@
+/* static/jobs/jobs.css */
+.jobs-container {
+    height: 100%; /* Fills <main> height */
+}
+
+.jobs-title {
+    margin-bottom: 1rem; /* Space below title */
+}
+
+.table-wrapper {
+    max-height: calc(100vh - 250px); /* Adjust for header, footer, title, and pagination */
+    overflow-y: auto; /* Scrollable table */
+}
+
+.table {
+    width: 100%;
+    margin-bottom: 0; /* No extra margin at bottom */
+}
+
+.table thead th {
+    position: sticky;
+    top: 0;
+    background: #343a40; /* Matches bg-dark */
+    color: white;
+    z-index: 1; /* Keeps header above scrolling body */
+}
+
+.pagination-container {
+    flex-shrink: 0; /* Prevents pagination from shrinking */
+}

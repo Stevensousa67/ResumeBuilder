@@ -6,26 +6,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         existingForms.forEach(form => {
             const inputs = form.querySelectorAll('[name]');
-            console.log(`Form inputs for ${prefix}:`, inputs);
             inputs.forEach(input => {
-                console.log(`Input name: ${input.name}`);
                 const match = input.name.match(new RegExp(`${prefix}-(\\d+)-`));
                 if (match) {
                     const index = parseInt(match[1]);
-                    console.log(`Found index ${index} in ${input.name}`);
                     if (index > maxIndex) maxIndex = index;
                 }
             });
         });
 
         console.log(`Max index for ${prefix}: ${maxIndex}`);
-        return maxIndex + 1; // Next available index
+        return maxIndex + 1;
     }
 
     function updateTotalForms(prefix, count) {
         let totalForms = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
-        totalForms.value = count;
-        console.log(`Updated ${prefix}-TOTAL_FORMS to ${count}`);
+        if (totalForms) {
+            totalForms.value = count;
+            console.log(`Updated ${prefix}-TOTAL_FORMS to ${count}`);
+        }
     }
 
     function addForm(prefix, emptyFormSelector, formContainerSelector) {
@@ -33,14 +32,17 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`Adding ${prefix} form with index ${formIdx}`);
 
         let emptyForm = document.querySelector(emptyFormSelector);
+        if (!emptyForm) {
+            console.error(`Empty form not found: ${emptyFormSelector}`);
+            return;
+        }
         let newForm = emptyForm.cloneNode(true);
 
         newForm.classList.remove('hidden-form');
         newForm.classList.add(`${prefix}-form`);
         newForm.style.display = 'block';
-        newForm.removeAttribute('id'); // Remove the ID to avoid duplicate IDs
+        newForm.removeAttribute('id');
 
-        // Update names and IDs with the new index
         newForm.querySelectorAll('[name], [id]').forEach(element => {
             if (element.name) {
                 element.setAttribute('name', element.name.replace('__prefix__', formIdx));
@@ -50,21 +52,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Reset values for the new form
         newForm.querySelectorAll('input, select, textarea').forEach(input => {
             input.value = '';
             if (input.type === 'checkbox') input.checked = false;
         });
 
-        // Append the new form to the container
         const container = document.querySelector(formContainerSelector);
+        if (!container) {
+            console.error(`Container not found: ${formContainerSelector}`);
+            return;
+        }
         container.appendChild(newForm);
+        console.log(`Appended new ${prefix} form`, newForm);
 
-        // Update TOTAL_FORMS based on actual active forms (excluding template)
         const totalForms = document.querySelectorAll(`.${prefix}-form:not(#empty-${prefix}-form)`).length;
         updateTotalForms(prefix, totalForms);
 
-        // For experience forms, reset and apply end_date logic
         if (prefix === 'experiences') {
             toggleEndDateField(newForm);
         }
@@ -73,34 +76,45 @@ document.addEventListener('DOMContentLoaded', () => {
     function toggleEndDateField(form) {
         const presentCheckbox = form.querySelector("input[name^='experiences'][name$='-present']");
         const endDateInput = form.querySelector("input[name^='experiences'][name$='-end_date']");
-
-        if (!presentCheckbox || !endDateInput) return;
-
-        endDateInput.disabled = presentCheckbox.checked;
+        if (presentCheckbox && endDateInput) {
+            endDateInput.disabled = presentCheckbox.checked;
+        }
     }
 
     document.addEventListener('change', event => {
         if (event.target.matches("input[name^='experiences'][name$='-present']")) {
             const form = event.target.closest('.experiences-form');
-            if (!form) return;
-            toggleEndDateField(form);
+            if (form) toggleEndDateField(form);
         }
     });
 
-    // Initialize existing forms
     document.querySelectorAll('.experiences-form').forEach(form => {
         toggleEndDateField(form);
     });
 
-    document.getElementById('add-experience').addEventListener('click', () => {
-        addForm('experiences', '#empty-experience-form', '#experience-forms');
-    });
+    function bindAddButtons() {
+        const addButtons = {
+            'experiences': document.getElementById('add-experience'),
+            'projects': document.getElementById('add-project'),
+            'references': document.getElementById('add-reference')
+        };
 
-    document.getElementById('add-project').addEventListener('click', () => {
-        addForm('projects', '#empty-project-form', '#project-forms');
-    });
+        Object.entries(addButtons).forEach(([prefix, button]) => {
+            if (button && !button.dataset.listenerAdded) {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    addForm(prefix, `#empty-${prefix}-form`, `#${prefix}-forms`);
+                });
+                button.dataset.listenerAdded = 'true';
+                console.log(`Added listener for ${prefix} button`);
+            } else if (!button) {
+                console.log(`No ${prefix} button found on this step`);
+            }
+        });
+    }
 
-    document.getElementById('add-reference').addEventListener('click', () => {
-        addForm('references', '#empty-reference-form', '#reference-forms');
+    bindAddButtons();
+    document.getElementById('signup-form').addEventListener('submit', () => {
+        setTimeout(bindAddButtons, 100);
     });
 });

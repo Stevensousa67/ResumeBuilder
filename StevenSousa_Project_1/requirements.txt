@@ -3,4 +3,5 @@ psycopg===3.2.4
 pytest==8.3.4
 pytest-mock==3.14.0
 django==5.1.6
+django-formtools==2.5.1
 python-decouple==3.8
