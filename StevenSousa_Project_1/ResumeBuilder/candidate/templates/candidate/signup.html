@@ -11,13 +11,6 @@
 {% block content %}
     <div class="container h-100 d-flex flex-column">
         <h1 class="mb-4 mt-4">Signup - Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</h1>
-
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-
         <form method="post" id="signup-form" class="flex-grow-1">
             {% csrf_token %}
             {{ wizard.management_form }}
