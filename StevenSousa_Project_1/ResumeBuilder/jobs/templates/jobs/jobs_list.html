@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Jobs{% endblock %}
 
 {% block extra_css %}
-{% load static %}
-    <link rel="stylesheet" href="{% static 'jobs/jobs_list.css' %}">
+    <link rel="stylesheet" href="{% static 'jobs/jobs.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -19,6 +19,7 @@
                 {% endfor %}
             </div>
         {% endif %}
+
         <h1 class="jobs-title">Jobs</h1>
         <div class="table-wrapper flex-grow-1 overflow-auto">
             <table class="table table-hover">
@@ -34,15 +35,15 @@
                 <tbody>
                     {% for job in jobs %}
                     <tr>
-                        <td>{{ job.job_title }}</td>
+                        <td><a href="{% url 'jobs:job_details' job.job_id %}">{{ job.job_title }}</a></td>
                         <td>{{ job.company_name }}</td>
                         <td>{{ job.location }}</td>
                         {% if job.job_description|length > 300 %}
-                        <td>{{ job.job_description|slice:":300" }} <a href="#">Read More</a></td>
+                        <td>{{ job.job_description|slice:":300" }} <a href="{% url 'jobs:job_details' job.job_id %}">Read More</a></td>
                         {% else %}
                         <td>{{ job.job_description }}</td>
                         {% endif %}
-                        <td>{{ job.remote }}</td>
+                        <td>{{ job.remote|yesno:"Yes,No" }}</td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -52,7 +53,6 @@
                 </tbody>
             </table>
         </div>
-        <!-- Pagination controls -->
         {% if jobs.has_other_pages %}
         <nav aria-label="Page navigation" class="pagination-container mt-2">
             <ul class="pagination justify-content-center mb-0">

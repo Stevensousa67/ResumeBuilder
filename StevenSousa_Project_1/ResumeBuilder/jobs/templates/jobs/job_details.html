@@ -1,5 +1,29 @@
-{% extends base %}
+{% extends 'base.html' %}
 
-{% block title %}Job Details{% endblock %}
+{% block title %}Job Details - {{ job.job_title }}{% endblock %}
 
 {% block content %}
+    <div class="container my-4">
+        <div class="card mx-auto" style="max-width: 800px;">
+            <div class="card-header">
+                <h1 class="card-title">{{ job.job_title }}</h1>
+                <h2 class="card-subtitle text-muted">{{ job.company_name }}</h2>
+            </div>
+            <div class="card-body">
+                <p class="card-text"><strong>Job ID:</strong> {{ job.job_id }}</p>
+                <p class="card-text"><strong>Location:</strong> {{ job.location }}</p>
+                <p class="card-text"><strong>Description:</strong> {{ job.job_description|linebreaks }}</p>
+                <p class="card-text"><strong>Remote:</strong> {{ job.remote }}</p>
+                <p class="card-text"><strong>Min Salary:</strong> {{ job.min_salary }}</p>
+                <p class="card-text"><strong>Max Salary:</strong> {{ job.max_salary }}</p>
+                <p class="card-text"><strong>Salary Frequency:</strong> {{ job.salary_time }}</p>
+                <p class="card-text"><strong>Posted Date:</strong> {{ job.posted_date }}</p>
+                <p class="card-text"><strong>URL:</strong> <a href="{{ job.url }}" target="_blank" rel="noopener noreferrer">{{ job.url }}</a></p>
+
+            </div>
+            <div class="card-footer text-end">
+                <a class="btn btn-primary" href="{% url 'jobs:jobs_list' %}">Back to Jobs</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
