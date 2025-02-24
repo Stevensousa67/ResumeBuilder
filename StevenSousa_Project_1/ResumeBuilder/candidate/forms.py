@@ -120,6 +120,27 @@ class ExperienceForm(forms.ModelForm):
         return cleaned_data
 
 # Formsets
-ExperienceFormSet = forms.inlineformset_factory(Candidate, Experience, form=ExperienceForm, extra=1, can_delete=True)
-ProjectFormSet = forms.inlineformset_factory(Candidate, Project, form=ProjectForm, extra=1, can_delete=True)
-ReferenceFormSet = forms.inlineformset_factory(Candidate, Reference, form=ReferenceForm, extra=1, can_delete=True)
+ExperienceFormSet = forms.inlineformset_factory(
+    Candidate,
+    Experience,
+    form=ExperienceForm,
+    fields=['title', 'company', 'start_date', 'end_date', 'description','present'],
+    extra=1,
+    can_delete=True
+)
+ProjectFormSet = forms.inlineformset_factory(
+    Candidate,
+    Project,
+    form=ProjectForm,
+    fields=['title', 'description'],
+    extra=1,
+    can_delete=True
+)
+ReferenceFormSet = forms.inlineformset_factory(
+    Candidate,
+    Reference,
+    form=ReferenceForm,
+    fields=['first_name', 'last_name', 'phone', 'email', 'relationship'],
+    extra=1,
+    can_delete=True
+)

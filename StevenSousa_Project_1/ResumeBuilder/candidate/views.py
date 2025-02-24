@@ -17,13 +17,12 @@ class CustomLoginView(LoginView):
     def get_success_url(self):
         user = self.request.user
         try:
-            candidate = Candidate.objects.get(user=user)  # Reverse lookup
-            # If candidate has no first_name, assume it's a new user needing to edit profile
+            candidate = Candidate.objects.get(user=user)
             if not candidate.first_name:
                 return reverse('candidate:edit_user')
             return reverse('jobs:jobs_list')
         except Candidate.DoesNotExist:
-            return reverse('candidate:edit_user')  # New user needs a Candidate
+            return reverse('candidate:edit_user')
 
 # Signup View
 def signup(request):
@@ -32,7 +31,6 @@ def signup(request):
         if form.is_valid():
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
-            # password_confirm is validated in SignupForm.clean()
             user = User.objects.create_user(username=email, email=email, password=password)
             candidate = Candidate(user=user, email=email)
             candidate.save()
@@ -42,7 +40,7 @@ def signup(request):
         form = SignupForm()
     return render(request, 'candidate/signup.html', {'form': form})
 
-# Custom Logout View (Optional, for GET support)
+# Custom Logout View (Optional)
 def logout_view(request):
     logout(request)
     return redirect('jobs:index')
@@ -72,41 +70,63 @@ class EditUserWizard(SessionWizardView):
                 return Candidate.objects.get(user=self.request.user)
             except Candidate.DoesNotExist:
                 return None
-        return None
+        return None  # Formsets don’t need instance here; handled in get_form
 
     def get_form_initial(self, step):
-        if step != 'candidate':
-            return None
-        try:
-            candidate = Candidate.objects.get(user=self.request.user)
-            return {
-                'first_name': candidate.first_name,
-                'last_name': candidate.last_name,
-                'email': candidate.email,
-                'phone': candidate.phone,
-                'website': candidate.website,
-                'address': candidate.address,
-                'education': candidate.education,
-                'major': candidate.major,
-                'skills': candidate.skills,
-                'courses': candidate.courses,
-            }
-        except Candidate.DoesNotExist:
-            return {}
+        if step == 'candidate':
+            try:
+                candidate = Candidate.objects.get(user=self.request.user)
+                return {
+                    'first_name': candidate.first_name,
+                    'last_name': candidate.last_name,
+                    'email': candidate.email,
+                    'phone': candidate.phone,
+                    'website': candidate.website,
+                    'address': candidate.address,
+                    'education': candidate.education,
+                    'major': candidate.major,
+                    'skills': candidate.skills,
+                    'courses': candidate.courses,
+                }
+            except Candidate.DoesNotExist:
+                return {}
+        return None  # No initial data needed for formsets; instances handle it
+
+    def get_form(self, step=None, data=None, files=None):
+        # Get the form for the current step
+        form = super().get_form(step, data, files)
+        if step in ['experience', 'projects', 'references']:
+            try:
+                candidate = Candidate.objects.get(user=self.request.user)
+                if step == 'experience':
+                    form = ExperienceFormSet(data=data, files=files, instance=candidate, prefix='experiences')
+                elif step == 'projects':
+                    form = ProjectFormSet(data=data, files=files, instance=candidate, prefix='projects')
+                elif step == 'references':
+                    form = ReferenceFormSet(data=data, files=files, instance=candidate, prefix='references')
+            except Candidate.DoesNotExist:
+                # If no Candidate exists, return an empty formset
+                if step == 'experience':
+                    form = ExperienceFormSet(data=data, files=files, prefix='experiences')
+                elif step == 'projects':
+                    form = ProjectFormSet(data=data, files=files, prefix='projects')
+                elif step == 'references':
+                    form = ReferenceFormSet(data=data, files=files, prefix='references')
+        return form
 
     def get_form_kwargs(self, step):
         kwargs = super().get_form_kwargs(step)
-        try:
-            candidate = Candidate.objects.get(user=self.request.user)
-            if step == 'experience':
-                kwargs['queryset'] = Experience.objects.filter(candidate=candidate)
-            elif step == 'projects':
-                kwargs['queryset'] = Project.objects.filter(candidate=candidate)
-            elif step == 'references':
-                kwargs['queryset'] = Reference.objects.filter(candidate=candidate)
-        except Candidate.DoesNotExist:
-            if step in ['experience', 'projects', 'references']:
-                kwargs['queryset'] = [].none()
+        if step in ['experience', 'projects', 'references']:
+            try:
+                candidate = Candidate.objects.get(user=self.request.user)
+                if step == 'experience':
+                    kwargs['queryset'] = Experience.objects.filter(candidate=candidate)
+                elif step == 'projects':
+                    kwargs['queryset'] = Project.objects.filter(candidate=candidate)
+                elif step == 'references':
+                    kwargs['queryset'] = Reference.objects.filter(candidate=candidate)
+            except Candidate.DoesNotExist:
+                kwargs['queryset'] = [].none()  # Empty queryset if no Candidate
         return kwargs
 
     def done(self, form_list, form_dict, **kwargs):

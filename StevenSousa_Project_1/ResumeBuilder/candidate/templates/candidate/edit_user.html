@@ -1,4 +1,3 @@
-<!-- candidate/templates/candidate/edit_user.html -->
 {% extends 'base.html' %}
 {% load static %}
 
@@ -43,21 +42,23 @@
                                 <div class="form-item experiences-form">
                                     <div class="row">
                                         {% for field in subform %}
-                                            {% if field.name == 'present' %}
-                                                <div class="col-12 mb-3">
-                                                    {{ field }} <label for="{{ field.id_for_label }}" class="form-check-label ms-2">{{ field.label }}</label>
-                                                    {% if field.errors %}
-                                                        <div class="invalid-feedback d-block">{{ field.errors|join:", " }}</div>
-                                                    {% endif %}
-                                                </div>
-                                            {% else %}
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                                                    {{ field }}
-                                                    {% if field.errors %}
-                                                        <div class="invalid-feedback d-block">{{ field.errors|join:", " }}</div>
-                                                    {% endif %}
-                                                </div>
+                                            {% if field.name not in 'id,candidate' %}
+                                                {% if field.name == 'present' %}
+                                                    <div class="col-12 mb-3">
+                                                        {{ field }} <label for="{{ field.id_for_label }}" class="form-check-label ms-2">{{ field.label }}</label>
+                                                        {% if field.errors %}
+                                                            <div class="invalid-feedback d-block">{{ field.errors|join:", " }}</div>
+                                                        {% endif %}
+                                                    </div>
+                                                {% else %}
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                                        {{ field }}
+                                                        {% if field.errors %}
+                                                            <div class="invalid-feedback d-block">{{ field.errors|join:", " }}</div>
+                                                        {% endif %}
+                                                    </div>
+                                                {% endif %}
                                             {% endif %}
                                         {% endfor %}
                                         {% if subform.can_delete %}
@@ -75,15 +76,17 @@
                             <div class="form-item">
                                 <div class="row">
                                     {% for field in form.empty_form %}
-                                        {% if field.name == 'present' %}
-                                            <div class="col-12 mb-3">
-                                                {{ field }} <label for="{{ field.id_for_label }}" class="form-check-label ms-2">{{ field.label }}</label>
-                                            </div>
-                                        {% else %}
-                                            <div class="col-md-6 mb-3">
-                                                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                                                {{ field }}
-                                            </div>
+                                        {% if field.name not in 'id,candidate' %}
+                                            {% if field.name == 'present' %}
+                                                <div class="col-12 mb-3">
+                                                    {{ field }} <label for="{{ field.id_for_label }}" class="form-check-label ms-2">{{ field.label }}</label>
+                                                </div>
+                                            {% else %}
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                                    {{ field }}
+                                                </div>
+                                            {% endif %}
                                         {% endif %}
                                     {% endfor %}
                                 </div>
@@ -91,46 +94,67 @@
                         </div>
                     </div>
                 {% elif step_name == 'projects' %}
-                    <div class="form-section">
-                        <h2 class="h4 mb-3">Projects</h2>
-                        {{ form.management_form }}
-                        <div id="projects-forms" class="formset-container">
-                            {% for subform in form %}
-                                <div class="form-item projects-form">
-                                    <div class="row">
-                                        {% for field in subform %}
-                                            <div class="col-12 mb-3">
-                                                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                                                {{ field }}
-                                                {% if field.errors %}
-                                                    <div class="invalid-feedback d-block">{{ field.errors|join:", " }}</div>
-                                                {% endif %}
-                                            </div>
-                                        {% endfor %}
-                                        {% if subform.can_delete %}
-                                            <div class="col-12 form-check mb-3">
-                                                <input type="checkbox" name="{{ subform.prefix }}-DELETE" class="form-check-input" id="{{ subform.prefix }}-delete">
-                                                <label class="form-check-label" for="{{ subform.prefix }}-delete">Delete this project</label>
-                                            </div>
+    <div class="form-section">
+        <h2 class="h4 mb-3">Projects</h2>
+        {{ form.management_form }}
+        <div id="projects-forms" class="formset-container">
+            {% for subform in form %}
+                <div class="form-item projects-form">
+                    <div class="row">
+                        {% for field in subform %}
+                            {% if field.name not in 'id,candidate' %}
+                                {% if field.name == 'title' %}
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                        {{ field }}
+                                        {% if field.errors %}
+                                            <div class="invalid-feedback d-block">{{ field.errors|join:", " }}</div>
                                         {% endif %}
                                     </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                        <button type="button" class="btn btn-outline-primary mb-3" id="add-project">Add Project</button>
-                        <div id="empty-projects-form" class="hidden-form">
-                            <div class="form-item">
-                                <div class="row">
-                                    {% for field in form.empty_form %}
-                                        <div class="col-12 mb-3">
-                                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                                            {{ field }}
-                                        </div>
-                                    {% endfor %}
-                                </div>
+                                {% elif field.name == 'description' %}
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                        {{ field }}
+                                        {% if field.errors %}
+                                            <div class="invalid-feedback d-block">{{ field.errors|join:", " }}</div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if subform.can_delete %}
+                            <div class="col-12 form-check mb-3">
+                                <input type="checkbox" name="{{ subform.prefix }}-DELETE" class="form-check-input" id="{{ subform.prefix }}-delete">
+                                <label class="form-check-label" for="{{ subform.prefix }}-delete">Delete this project</label>
                             </div>
-                        </div>
+                        {% endif %}
                     </div>
+                </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn btn-outline-primary mb-3" id="add-project">Add Project</button>
+        <div id="empty-projects-form" class="hidden-form">
+            <div class="form-item">
+                <div class="row">
+                    {% for field in form.empty_form %}
+                        {% if field.name not in 'id,candidate' %}
+                            {% if field.name == 'title' %}
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                    {{ field }}
+                                </div>
+                            {% elif field.name == 'description' %}
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                    {{ field }}
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
                 {% elif step_name == 'references' %}
                     <div class="form-section">
                         <h2 class="h4 mb-3">References</h2>
@@ -140,13 +164,15 @@
                                 <div class="form-item references-form">
                                     <div class="row">
                                         {% for field in subform %}
-                                            <div class="col-md-6 mb-3">
-                                                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                                                {{ field }}
-                                                {% if field.errors %}
-                                                    <div class="invalid-feedback d-block">{{ field.errors|join:", " }}</div>
-                                                {% endif %}
-                                            </div>
+                                            {% if field.name not in 'id,candidate' %}
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                                    {{ field }}
+                                                    {% if field.errors %}
+                                                        <div class="invalid-feedback d-block">{{ field.errors|join:", " }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            {% endif %}
                                         {% endfor %}
                                         {% if subform.can_delete %}
                                             <div class="col-12 form-check mb-3">
@@ -163,10 +189,12 @@
                             <div class="form-item">
                                 <div class="row">
                                     {% for field in form.empty_form %}
-                                        <div class="col-md-6 mb-3">
-                                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                                            {{ field }}
-                                        </div>
+                                        {% if field.name not in 'id,candidate' %}
+                                            <div class="col-md-6 mb-3">
+                                                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                                {{ field }}
+                                            </div>
+                                        {% endif %}
                                     {% endfor %}
                                 </div>
                             </div>
