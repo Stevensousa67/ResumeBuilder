@@ -19,6 +19,7 @@ env_path = os.path.join(BASE_DIR, '.env')
 if os.path.exists(env_path):
     config = AutoConfig(search_path=BASE_DIR)
 
+
 class Command(BaseCommand):
     help = 'Ensures that the database is correctly setup so that Django can successfully connect'
 
@@ -38,12 +39,12 @@ class Command(BaseCommand):
         # Connect to PostgreSQL server using default credentials
         try:
             with psycopg.connect(
-                dbname=db_name_default,
-                user=db_user_default,
-                password=db_password_default,
-                host=db_host,
-                port=db_port,
-                autocommit=True
+                    dbname=db_name_default,
+                    user=db_user_default,
+                    password=db_password_default,
+                    host=db_host,
+                    port=db_port,
+                    autocommit=True
             ) as conn:
                 with conn.cursor() as cursor:
                     # Check if custom db exists in server
@@ -69,11 +70,11 @@ class Command(BaseCommand):
         # Connect using the new credentials
         try:
             with psycopg.connect(
-                dbname=db_name,
-                user=db_user,
-                password=db_password,
-                host=db_host,
-                port=db_port
+                    dbname=db_name,
+                    user=db_user,
+                    password=db_password,
+                    host=db_host,
+                    port=db_port
             ) as conn:
                 with conn.cursor() as cursor:
                     cursor.execute("""SELECT 1;""")

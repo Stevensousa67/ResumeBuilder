@@ -10,6 +10,7 @@ from .forms import SignupForm, CandidateForm, ReferenceFormSet, ProjectFormSet, 
 from .models import Candidate, Experience, Project, Reference
 from django.contrib.auth.views import LoginView
 
+
 # Custom Login View
 class CustomLoginView(LoginView):
     template_name = 'candidate/login.html'
@@ -23,6 +24,7 @@ class CustomLoginView(LoginView):
             return reverse('jobs:jobs_list')
         except Candidate.DoesNotExist:
             return reverse('candidate:edit_user')
+
 
 # Signup View
 def signup(request):
@@ -40,10 +42,12 @@ def signup(request):
         form = SignupForm()
     return render(request, 'candidate/signup.html', {'form': form})
 
+
 # Custom Logout View (Optional)
 def logout_view(request):
     logout(request)
     return redirect('jobs:index')
+
 
 # Edit User Wizard
 class EditUserWizard(SessionWizardView):
@@ -179,5 +183,6 @@ class EditUserWizard(SessionWizardView):
         context = super().get_context_data(form=form, **kwargs)
         context['step_name'] = self.steps.current
         return context
+
 
 edit_user = login_required(EditUserWizard.as_view())

@@ -1,13 +1,14 @@
 from django import forms
-from django.forms import formset_factory
 from django.contrib.auth.models import User
 from .models import Candidate, Reference, Project, Experience
+
 
 # Sign Up Form
 class SignupForm(forms.Form):
     email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
-    password_confirm = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}), label="Confirm Password")
+    password_confirm = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+                                       label="Confirm Password")
 
     def clean_email(self):
         email = self.cleaned_data['email'].lower()
@@ -23,6 +24,7 @@ class SignupForm(forms.Form):
         if password and password_confirm and password != password_confirm:
             raise forms.ValidationError("Passwords do not match.")
         return cleaned_data
+
 
 # Candidate Form
 class CandidateForm(forms.ModelForm):
@@ -53,6 +55,7 @@ class CandidateForm(forms.ModelForm):
         email = self.cleaned_data['email']
         return email.lower()
 
+
 # Reference Form
 class ReferenceForm(forms.ModelForm):
     class Meta:
@@ -76,6 +79,7 @@ class ReferenceForm(forms.ModelForm):
         email = self.cleaned_data['email']
         return email.lower() if email else email
 
+
 # Project Form
 class ProjectForm(forms.ModelForm):
     class Meta:
@@ -85,6 +89,7 @@ class ProjectForm(forms.ModelForm):
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
+
 
 # Experience Form
 class ExperienceForm(forms.ModelForm):
@@ -119,12 +124,13 @@ class ExperienceForm(forms.ModelForm):
 
         return cleaned_data
 
+
 # Formsets
 ExperienceFormSet = forms.inlineformset_factory(
     Candidate,
     Experience,
     form=ExperienceForm,
-    fields=['title', 'company', 'start_date', 'end_date', 'description','present'],
+    fields=['title', 'company', 'start_date', 'end_date', 'description', 'present'],
     extra=1,
     can_delete=True
 )

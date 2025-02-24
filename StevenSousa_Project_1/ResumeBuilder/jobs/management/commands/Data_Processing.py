@@ -12,6 +12,7 @@ import re
 from django.core.management.base import BaseCommand
 from jobs.models import Job
 
+
 class Command(BaseCommand):
     help = 'Parses job data from JSON files and saves it to the Django managed DB.'
 
@@ -28,7 +29,7 @@ class Command(BaseCommand):
                         for obj in job_objects:
                             job_data = self.extract_job_data(obj)
                             Job.objects.update_or_create(
-                                job_id = job_data['job_id'],
+                                job_id=job_data['job_id'],
                                 defaults={
                                     'job_title': job_data['job_title'],
                                     'company_name': job_data['company_name'],
@@ -47,7 +48,6 @@ class Command(BaseCommand):
                         self.stdout.write(self.style.ERROR(f"Error decoding JSON: {e}"))
         self.stdout.write(self.style.SUCCESS(f"Successfully inserted {insert_count} jobs to the database."))
 
-
     def normalize_json_data(self, data):
         if isinstance(data, list):
             return data
@@ -56,7 +56,6 @@ class Command(BaseCommand):
         else:
             self.stdout.write(self.style.ERROR(f"Skipping invalid data structure: {data}"))
             return []
-
 
     def extract_job_data(self, obj):
         return {
@@ -72,7 +71,6 @@ class Command(BaseCommand):
             'url': self.get_url(obj),
             'remote': self.get_remote_status(obj),
         }
-
 
     def parse_salary(self, job_obj):
         if 'min_amount' and 'max_amount' in job_obj:
@@ -97,13 +95,11 @@ class Command(BaseCommand):
                 return salaries[0], salaries[0]
         return 0, 0
 
-
     def convert_salary(self, salary):
         if salary != '':
             return int(float(salary))
         else:
             return 0
-
 
     def get_salary_frequency(self, job_obj):
         if 'salaryRange' in job_obj:

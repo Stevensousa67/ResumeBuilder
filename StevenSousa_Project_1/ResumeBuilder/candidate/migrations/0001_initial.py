@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -21,10 +20,15 @@ class Migration(migrations.Migration):
                 ('email', models.EmailField(max_length=254, unique=True)),
                 ('phone', models.CharField(max_length=20)),
                 ('address', models.TextField(blank=True, max_length=500, null=True)),
-                ('education', models.CharField(blank=True, choices=[('HS', 'High School'), ('GED', 'GED'), ('CERT', 'Certificate'), ('AA', "Associate's"), ('BA', "Bachelor's"), ('MA', "Master's"), ('PHD', 'Ph.D.')], max_length=50, null=True)),
+                ('education', models.CharField(blank=True,
+                                               choices=[('HS', 'High School'), ('GED', 'GED'), ('CERT', 'Certificate'),
+                                                        ('AA', "Associate's"), ('BA', "Bachelor's"), ('MA', "Master's"),
+                                                        ('PHD', 'Ph.D.')], max_length=50, null=True)),
                 ('major', models.CharField(blank=True, max_length=100, null=True)),
                 ('minor', models.CharField(blank=True, max_length=100, null=True)),
-                ('gpa', models.DecimalField(blank=True, decimal_places=2, help_text='Enter GPA (e.g., 3.50)', max_digits=3, null=True)),
+                ('gpa',
+                 models.DecimalField(blank=True, decimal_places=2, help_text='Enter GPA (e.g., 3.50)', max_digits=3,
+                                     null=True)),
                 ('skills', models.TextField(blank=True, null=True)),
                 ('courses', models.TextField(blank=True, null=True)),
             ],
@@ -43,7 +47,8 @@ class Migration(migrations.Migration):
                 ('start_date', models.DateField()),
                 ('end_date', models.DateField(blank=True, null=True)),
                 ('description', models.TextField(blank=True, max_length=1000, null=True)),
-                ('candidate', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='experiences', to='candidate.candidate')),
+                ('candidate', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='experiences',
+                                                to='candidate.candidate')),
             ],
             options={
                 'verbose_name': 'Experience',
@@ -57,7 +62,8 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('title', models.CharField(max_length=200)),
                 ('description', models.TextField(blank=True, max_length=2000, null=True)),
-                ('candidate', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='projects', to='candidate.candidate')),
+                ('candidate', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='projects',
+                                                to='candidate.candidate')),
             ],
             options={
                 'verbose_name': 'Project',
@@ -74,7 +80,8 @@ class Migration(migrations.Migration):
                 ('email', models.EmailField(blank=True, max_length=254, null=True)),
                 ('phone', models.CharField(blank=True, max_length=20, null=True)),
                 ('relationship', models.CharField(blank=True, max_length=100, null=True)),
-                ('candidate', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='references', to='candidate.candidate')),
+                ('candidate', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='references',
+                                                to='candidate.candidate')),
             ],
             options={
                 'verbose_name': 'Reference',
