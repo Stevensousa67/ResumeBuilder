@@ -137,6 +137,10 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+# Authentication redirects
+LOGIN_REDIRECT_URL = 'jobs:jobs_list'  # Fallback, overridden by CustomLoginView
+LOGOUT_REDIRECT_URL = 'jobs:jobs_list'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 

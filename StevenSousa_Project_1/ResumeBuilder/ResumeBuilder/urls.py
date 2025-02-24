@@ -16,10 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from candidate.views import SignupWizard
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('jobs.urls')),
-    path('signup/', SignupWizard.as_view(), name='signup'),
+    path('candidate/', include('candidate.urls')),
 ]

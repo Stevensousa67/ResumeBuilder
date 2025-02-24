@@ -1,8 +1,10 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Candidate model - Main user profile
 class Candidate(models.Model):
     candidate_id = models.AutoField(primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     first_name = models.CharField(max_length=100, blank=False, null=False)
     last_name = models.CharField(max_length=100, blank=False, null=False)
     email = models.EmailField(unique=True, blank=False, null=False)

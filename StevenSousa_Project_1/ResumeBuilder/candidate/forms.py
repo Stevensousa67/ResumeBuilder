@@ -1,6 +1,28 @@
 from django import forms
 from django.forms import formset_factory
+from django.contrib.auth.models import User
 from .models import Candidate, Reference, Project, Experience
+
+# Sign Up Form
+class SignupForm(forms.Form):
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    password_confirm = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}), label="Confirm Password")
+
+    def clean_email(self):
+        email = self.cleaned_data['email'].lower()
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("Email is already in use.")
+        return email
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        password_confirm = cleaned_data.get('password_confirm')
+
+        if password and password_confirm and password != password_confirm:
+            raise forms.ValidationError("Passwords do not match.")
+        return cleaned_data
 
 # Candidate Form
 class CandidateForm(forms.ModelForm):
@@ -14,13 +36,12 @@ class CandidateForm(forms.ModelForm):
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
             'website': forms.URLInput(attrs={'class': 'form-control'}),
-            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'skills': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 1}),
+            'skills': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
             'education': forms.Select(attrs={'class': 'form-select'}),
             'major': forms.TextInput(attrs={'class': 'form-control'}),
-            'courses': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'courses': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
         }
-
 
     def clean_phone(self):
         phone = self.cleaned_data['phone']
@@ -28,11 +49,9 @@ class CandidateForm(forms.ModelForm):
             raise forms.ValidationError("Phone number must contain only digits.")
         return phone
 
-
     def clean_email(self):
         email = self.cleaned_data['email']
         return email.lower()
-
 
 # Reference Form
 class ReferenceForm(forms.ModelForm):
@@ -47,18 +66,15 @@ class ReferenceForm(forms.ModelForm):
             'relationship': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
-
     def clean_phone(self):
         phone = self.cleaned_data['phone']
         if phone and not phone.replace('-', '').replace(' ', '').replace('(', '').replace(')', '').isdigit():
             raise forms.ValidationError("Phone number must contain only digits.")
         return phone
 
-
     def clean_email(self):
         email = self.cleaned_data['email']
         return email.lower() if email else email
-
 
 # Project Form
 class ProjectForm(forms.ModelForm):
@@ -69,7 +85,6 @@ class ProjectForm(forms.ModelForm):
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
-
 
 # Experience Form
 class ExperienceForm(forms.ModelForm):
@@ -104,8 +119,7 @@ class ExperienceForm(forms.ModelForm):
 
         return cleaned_data
 
-
 # Formsets
-ExperienceFormSet = formset_factory(ExperienceForm, extra=1, can_delete=True)
-ProjectFormSet = formset_factory(ProjectForm, extra=1, can_delete=True)
-ReferenceFormSet = formset_factory(ReferenceForm, extra=1, can_delete=True)
+ExperienceFormSet = forms.inlineformset_factory(Candidate, Experience, form=ExperienceForm, extra=1, can_delete=True)
+ProjectFormSet = forms.inlineformset_factory(Candidate, Project, form=ProjectForm, extra=1, can_delete=True)
+ReferenceFormSet = forms.inlineformset_factory(Candidate, Reference, form=ReferenceForm, extra=1, can_delete=True)
