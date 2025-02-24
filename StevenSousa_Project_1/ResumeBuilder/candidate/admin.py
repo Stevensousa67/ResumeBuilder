@@ -4,11 +4,10 @@ from .models import Candidate, Reference, Project, Experience
 # Register your models here.
 @admin.register(Candidate)
 class CandidateAdmin(admin.ModelAdmin):
-    list_display = ('candidate_id', 'first_name', 'last_name', 'email', 'phone', 'address', 'education', 'major',
-                    'minor', 'gpa', 'skills')
-    search_fields = ('first_name', 'last_name', 'email', 'phone', 'address', 'education', 'major', 'minor', 'gpa',
-                     'skills')
-    list_filter = ('education', 'major', 'minor', 'gpa')
+    list_display = ('candidate_id', 'first_name', 'last_name', 'email', 'phone', 'website', 'address', 'education',
+                    'major', 'skills')
+    search_fields = ('first_name', 'last_name', 'email', 'phone', 'website', 'address', 'education', 'major', 'skills')
+    list_filter = ('education', 'major',)
 
 
 @admin.register(Reference)

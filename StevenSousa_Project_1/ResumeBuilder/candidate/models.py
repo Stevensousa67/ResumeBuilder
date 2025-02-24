@@ -7,6 +7,8 @@ class Candidate(models.Model):
     last_name = models.CharField(max_length=100, blank=False, null=False)
     email = models.EmailField(unique=True, blank=False, null=False)
     phone = models.CharField(max_length=20, blank=False, null=False)
+    website = models.URLField(max_length=200, blank=True, null=True)
+    skills = models.TextField(blank=True, null=True)
     address = models.TextField(max_length=500, blank=True, null=True)
 
 
@@ -26,15 +28,6 @@ class Candidate(models.Model):
         null=True
     )
     major = models.CharField(max_length=100, blank=True, null=True)
-    minor = models.CharField(max_length=100, blank=True, null=True)
-    gpa = models.DecimalField(
-        max_digits=3,
-        decimal_places=2,
-        blank=True,
-        null=True,
-        help_text="Enter GPA (e.g., 3.50)"
-    )
-    skills = models.TextField(blank=True, null=True)
     courses = models.TextField(blank=True, null=True)
 
 

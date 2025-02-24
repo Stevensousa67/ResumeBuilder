@@ -6,19 +6,18 @@ from .models import Candidate, Reference, Project, Experience
 class CandidateForm(forms.ModelForm):
     class Meta:
         model = Candidate
-        fields = ['first_name', 'last_name', 'email', 'phone', 'address', 'education', 'major', 'minor', 'gpa',
+        fields = ['first_name', 'last_name', 'email', 'phone', 'website', 'address', 'education', 'major',
                   'skills', 'courses']
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'website': forms.URLInput(attrs={'class': 'form-control'}),
             'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'skills': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'education': forms.Select(attrs={'class': 'form-select'}),
             'major': forms.TextInput(attrs={'class': 'form-control'}),
-            'minor': forms.TextInput(attrs={'class': 'form-control'}),
-            'gpa': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'max': '4.0'}),
-            'skills': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'courses': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
