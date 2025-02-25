@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-from decouple import config
+from decouple import config, AutoConfig
 import os
 import sys
 
@@ -22,8 +22,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 env_path = os.path.join(BASE_DIR, '.env')
 if os.path.exists(env_path):
-    from decouple import AutoConfig
-
     config = AutoConfig(search_path=BASE_DIR)
 
 # Quick-start development settings - unsuitable for production
