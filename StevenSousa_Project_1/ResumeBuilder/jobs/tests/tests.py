@@ -1,11 +1,12 @@
-import json
 from django.test import TransactionTestCase
 from django.conf import settings
 from django.core.management import call_command
+from django.urls import reverse
 import psycopg
 import sys
 import io
 import os
+import json
 
 
 class TestJobDatabase(TransactionTestCase):
@@ -135,6 +136,84 @@ class TestJobDatabase(TransactionTestCase):
             self.fail(f"Invalid JSON in expected_results.json: {e}")
         except Exception as e:
             self.fail(f"Unexpected error in test_04_fetch_specific_job: {e}")
+
+    def test_05_job_detail_display(self):
+        try:
+            with psycopg.connect(
+                dbname=settings.DATABASES['default']['NAME'],
+                user=settings.DATABASES['default']['USER'],
+                password=settings.DATABASES['default']['PASSWORD'],
+                host=settings.DATABASES['default']['HOST'],
+                port=settings.DATABASES['default']['PORT'],
+                autocommit=True
+            ) as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute("SELECT job_id FROM django_jobs ORDER BY RANDOM() LIMIT 1;")
+                    job_id = cursor.fetchone()[0]
+                    if not job_id:
+                        self.fail("No job found in database to test job detail display")
+
+            client = self.client
+            url = reverse('jobs:job_details', kwargs={'job_id': job_id})
+            response = client.get(url)
+
+            self.assertEqual(response.status_code, 200, f"Failed to retrieve job details for job_id: {job_id}")
+            self.assertTemplateUsed(response, 'jobs/job_details.html', "Incorrect template used for job details")
+
+            # Get job from database for comparison
+            with psycopg.connect(
+                dbname=settings.DATABASES['default']['NAME'],
+                user=settings.DATABASES['default']['USER'],
+                password=settings.DATABASES['default']['PASSWORD'],
+                host=settings.DATABASES['default']['HOST'],
+                port=settings.DATABASES['default']['PORT'],
+                autocommit=True
+            ) as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(
+                        f"SELECT * FROM django_jobs WHERE job_id = %s;",
+                        (job_id,))
+                    db_job = cursor.fetchone()
+
+                    if db_job is None:
+                        self.fail(f"No job found in database with job_id: {job_id}")
+
+                    db_job_dict = {
+                        'job_id': db_job[0],
+                        'job_title': db_job[1],
+                        'company_name': db_job[2],
+                        'job_description': db_job[3],
+                        'location': db_job[4],
+                        'min_salary': db_job[5],
+                        'max_salary': db_job[6],
+                        'salary_time': db_job[7],
+                        'posted_date': db_job[8],
+                        'url': db_job[9],
+                        'remote': bool(db_job[10])
+                    }
+                    if response.context:
+                        job_from_response = response.context['job']
+
+                        self.assertEqual(job_from_response.job_id, db_job_dict['job_id'], "Job ID mismatch")
+                        self.assertEqual(job_from_response.job_title, db_job_dict['job_title'], "Job Title mismatch")
+                        self.assertEqual(job_from_response.company_name, db_job_dict['company_name'], "Company Name mismatch")
+                        self.assertEqual(job_from_response.job_description, db_job_dict['job_description'], "Job Description mismatch")
+                        self.assertEqual(job_from_response.location, db_job_dict['location'], "Location mismatch")
+                        self.assertEqual(job_from_response.min_salary, db_job_dict['min_salary'], "Min Salary mismatch")
+                        self.assertEqual(job_from_response.max_salary, db_job_dict['max_salary'], "Max Salary mismatch")
+                        self.assertEqual(job_from_response.salary_time, db_job_dict['salary_time'], "Salary Time mismatch")
+                        self.assertEqual(job_from_response.posted_date, db_job_dict['posted_date'], "Posted Date mismatch")
+                        self.assertEqual(job_from_response.url, db_job_dict['url'], "URL mismatch")
+                        self.assertEqual(job_from_response.remote, db_job_dict['remote'], "Remote mismatch")
+                    else:
+                        response_content = response.content.decode('utf-8')
+                        for field, value in db_job_dict.items():
+                            self.assertIn(str(value), response_content, f"Field '{field}' not found in response content")
+
+        except psycopg.OperationalError as e:
+            self.fail(f"Error querying test database: {e}")
+        except Exception as e:
+            self.fail(f"Unexpected error in test_05_job_detail_display: {e}")
 
 
 def tearDown(self):
