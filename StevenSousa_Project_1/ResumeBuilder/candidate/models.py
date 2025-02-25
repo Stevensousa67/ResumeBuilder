@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.conf import settings
 
 
 # Candidate model - Main user profile
@@ -33,7 +34,7 @@ class Candidate(models.Model):
     courses = models.TextField(blank=True, null=True)
 
     class Meta:
-        db_table = 'django_candidate'
+        db_table = 'django_candidate' if getattr(settings, 'TESTING', False) else 'test_django_candidate'
         verbose_name = 'Candidate'
         verbose_name_plural = 'Candidates'
 
