@@ -16,7 +16,7 @@ class Job(models.Model):
     remote = models.BooleanField(default=False)
 
     class Meta:
-       db_table = 'django_jobs' if getattr(settings, 'TESTING', False) else 'test_django_jobs'
+        db_table = 'django_jobs' if not settings.TESTING else 'test_django_jobs'
 
     def __str__(self):
         return self.job_title
