@@ -34,7 +34,7 @@ class Candidate(models.Model):
     courses = models.TextField(blank=True, null=True)
 
     class Meta:
-        db_table = 'django_candidate' if not settings.TESTING else 'test_django_candidate'
+        db_table = 'django_candidate'
         verbose_name = 'Candidate'
         verbose_name_plural = 'Candidates'
 
