@@ -14,37 +14,74 @@ permissions:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+    env:
+      # Default database credentials
+      DB_NAME_DEFAULT: ${{ secrets.DB_NAME_DEFAULT }}
+      DB_USER_DEFAULT: ${{ secrets.DB_USER_DEFAULT }}
+      DB_PASSWORD_DEFAULT: ${{ secrets.DB_PASSWORD_DEFAULT }}
+      DB_HOST_DEFAULT: ${{ secrets.DB_HOST_DEFAULT }}
+      DB_PORT_DEFAULT: ${{ secrets.DB_PORT_DEFAULT }}
 
+      # Custom database credentials
+      DB_NAME_TEST: ${{ secrets.DB_NAME_TEST }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
+      # GCP database credentials
+      GCP_DB_NAME_DEFAULT: ${{ secrets.GCP_DB_NAME_DEFAULT }}
+      GCP_DB_USER_DEFAULT: ${{ secrets.GCP_DB_USER_DEFAULT }}
+      GCP_DB_PASSWORD_DEFAULT: ${{ secrets.GCP_DB_PASSWORD_DEFAULT }}
+      GCP_DB_HOST: ${{ secrets.GCP_DB_HOST }}
+      GCP_DB_PORT: ${{ secrets.GCP_DB_PORT }}
+
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          DB_NAME_DEFAULT: ${{ secrets.DB_NAME_DEFAULT }}
+          DB_USER_DEFAULT: ${{ secrets.DB_USER_DEFAULT }}
+          DB_PASSWORD_DEFAULT: ${{ secrets.DB_PASSWORD_DEFAULT }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python 3.10
+    - name: Set up Python 3.13
       uses: actions/setup-python@v3
       with:
-        python-version: "3.10"
+        python-version: "3.13"
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest pytest-mock psycopg python-dotenv
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install flake8
+        if [ -f StevenSousa_Project1/requirements.txt ]; then pip install -r StevenSousa_Project1/requirements.txt; fi
+
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with pytest
-      working-directory: StevenSousa_Project_1
-      env:
-        DB_NAME_TEST: ${{ secrets.DB_NAME_TEST }}
-        DB_NAME: ${{ secrets.DB_NAME }}
-        DB_USER: ${{ secrets.DB_USER }}
-        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        GCP_DB_NAME_DEFAULT: ${{ secrets.GCP_DB_NAME_DEFAULT }}
-        GCP_DB_USER_DEFAULT: ${{ secrets.GCP_DB_USER_DEFAULT }}
-        GCP_DB_PASSWORD_DEFAULT: ${{ secrets.GCP_DB_PASSWORD_DEFAULT }}
-        GCP_DB_HOST: ${{ secrets.GCP_DB_HOST }}
-        GCP_DB_PORT: ${{ secrets.GCP_DB_PORT }}
+
+    - name: Run Django Management Commands
+      working-directory: StevenSousa_Project_1/ResumeBuilder
       run: |
-        python -m pytest tests/*.py
+        python manage.py create_db
+        python manage.py data_processing
+
+    - name: Run Django Migrations
+      working-directory: StevenSousa_Project_1/ResumeBuilder
+      run: |
+        python manage.py migrate
+
+    - name: Run Django Tests
+      working-directory: StevenSousa_Project_1/ResumeBuilder
+      run: |
+        python manage.py test
