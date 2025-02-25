@@ -15,10 +15,10 @@ from decouple import config, AutoConfig
 import os
 import sys
 
-TESTING = 'test' in sys.argv # Auto-detect if runnings tests
+TESTING = 'test' in sys.argv # Auto-detect if running tests
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 env_path = os.path.join(BASE_DIR, '.env')
 if os.path.exists(env_path):
@@ -64,7 +64,7 @@ ROOT_URLCONF = 'ResumeBuilder.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [BASE_DIR / 'ResumeBuilder/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -127,11 +127,11 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
-    BASE_DIR / "candidate/static",
-    BASE_DIR / "jobs/static",
+    BASE_DIR / "ResumeBuilder/static",
+    BASE_DIR / "ResumeBuilder/candidate/static",
+    BASE_DIR / "ResumeBuilder/jobs/static",
 ]
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT = BASE_DIR / "ResumeBuilder/staticfiles"
 
 # Authentication redirects
 LOGIN_REDIRECT_URL = 'jobs:jobs_list'  # Fallback, overridden by CustomLoginView

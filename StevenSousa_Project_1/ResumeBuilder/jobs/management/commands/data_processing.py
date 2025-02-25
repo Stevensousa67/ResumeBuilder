@@ -10,7 +10,9 @@ This file will parse the json files containing jobs and save them to the Django 
 import json
 import re
 from django.core.management.base import BaseCommand
+from django.conf import settings
 from jobs.models import Job
+import os
 
 
 class Command(BaseCommand):
@@ -18,7 +20,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         insert_count = 0
-        json_files = ['./jobs/data/rapidResults.json', './jobs/data/rapid_jobs2.json']
+        base_path = settings.BASE_DIR
+        json_files = [os.path.join(base_path, 'ResumeBuilder', 'jobs', 'data', 'rapidResults.json'),
+                      os.path.join(base_path, 'ResumeBuilder', 'jobs', 'data', 'rapid_jobs2.json')]
 
         for filename in json_files:
             with open(filename, 'r') as file:
