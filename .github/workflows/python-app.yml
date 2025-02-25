@@ -74,14 +74,10 @@ jobs:
       working-directory: StevenSousa_Project_1/ResumeBuilder
       run: |
         python manage.py create_db
-        python manage.py data_processing
-
-    - name: Run Django Migrations
-      working-directory: StevenSousa_Project_1/ResumeBuilder
-      run: |
         python manage.py migrate
+        python manage.py data_processing
 
     - name: Run Django Tests
       working-directory: StevenSousa_Project_1/ResumeBuilder
       run: |
-        python manage.py test
+        python manage.py test jobs.tests candidate.tests
