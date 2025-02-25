@@ -12,7 +12,6 @@ import os
 from pathlib import Path
 from decouple import AutoConfig
 from django.core.management.base import BaseCommand
-from django.db import connection
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
 env_path = os.path.join(BASE_DIR, '.env')
