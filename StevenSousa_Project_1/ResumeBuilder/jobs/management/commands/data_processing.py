@@ -18,7 +18,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         insert_count = 0
-        json_files = ['../data/rapidResults.json', '../data/rapid_jobs2.json']
+        json_files = ['./jobs/data/rapidResults.json', './jobs/data/rapid_jobs2.json']
 
         for filename in json_files:
             with open(filename, 'r') as file:
