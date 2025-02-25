@@ -42,7 +42,7 @@ class TestJobDatabase(TestCase):
                 autocommit=True
             ) as conn:
                 with conn.cursor() as cursor:
-                    table_name = 'test_django_jobs'
+                    table_name = 'django_jobs'
                     cursor.execute(f"SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = '{table_name}');")
                     exists = cursor.fetchone()[0]
                     self.assertTrue(exists, f"Table '{table_name}' exists in test database!")
