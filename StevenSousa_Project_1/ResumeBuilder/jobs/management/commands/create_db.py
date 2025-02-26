@@ -10,13 +10,13 @@ Description: This script will make sure that the database is correctly setup so 
 import psycopg
 import os
 from pathlib import Path
-from decouple import AutoConfig
+from decouple import config, AutoConfig
 from django.core.management.base import BaseCommand
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
 env_path = os.path.join(BASE_DIR, '.env')
 if os.path.exists(env_path):
-    config = AutoConfig(search_path=BASE_DIR)
+    env_config = AutoConfig(search_path=BASE_DIR)
 
 
 class Command(BaseCommand):
