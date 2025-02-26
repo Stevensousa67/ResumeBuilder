@@ -1,4 +1,3 @@
-import json
 from django.test import TransactionTestCase
 from django.urls import reverse
 from django.contrib.auth.models import User

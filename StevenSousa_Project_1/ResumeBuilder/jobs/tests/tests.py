@@ -105,8 +105,8 @@ class TestJobDatabase(TransactionTestCase):
                     ) as conn:
                         with conn.cursor() as cursor:
                             cursor.execute(
-                                f"SELECT job_id, job_title, company_name, job_description, location, min_salary, "
-                                f"max_salary, salary_time, posted_date, url, remote FROM django_jobs WHERE job_id = %s;",
+                                "SELECT job_id, job_title, company_name, job_description, location, min_salary, "
+                                "max_salary, salary_time, posted_date, url, remote FROM django_jobs WHERE job_id = %s;",
                                 (job_id,))
                             db_job = cursor.fetchone()
 
@@ -140,12 +140,12 @@ class TestJobDatabase(TransactionTestCase):
     def test_05_job_detail_display(self):
         try:
             with psycopg.connect(
-                dbname=settings.DATABASES['default']['NAME'],
-                user=settings.DATABASES['default']['USER'],
-                password=settings.DATABASES['default']['PASSWORD'],
-                host=settings.DATABASES['default']['HOST'],
-                port=settings.DATABASES['default']['PORT'],
-                autocommit=True
+                    dbname=settings.DATABASES['default']['NAME'],
+                    user=settings.DATABASES['default']['USER'],
+                    password=settings.DATABASES['default']['PASSWORD'],
+                    host=settings.DATABASES['default']['HOST'],
+                    port=settings.DATABASES['default']['PORT'],
+                    autocommit=True
             ) as conn:
                 with conn.cursor() as cursor:
                     cursor.execute("SELECT job_id FROM django_jobs ORDER BY RANDOM() LIMIT 1;")
@@ -162,17 +162,15 @@ class TestJobDatabase(TransactionTestCase):
 
             # Get job from database for comparison
             with psycopg.connect(
-                dbname=settings.DATABASES['default']['NAME'],
-                user=settings.DATABASES['default']['USER'],
-                password=settings.DATABASES['default']['PASSWORD'],
-                host=settings.DATABASES['default']['HOST'],
-                port=settings.DATABASES['default']['PORT'],
-                autocommit=True
+                    dbname=settings.DATABASES['default']['NAME'],
+                    user=settings.DATABASES['default']['USER'],
+                    password=settings.DATABASES['default']['PASSWORD'],
+                    host=settings.DATABASES['default']['HOST'],
+                    port=settings.DATABASES['default']['PORT'],
+                    autocommit=True
             ) as conn:
                 with conn.cursor() as cursor:
-                    cursor.execute(
-                        f"SELECT * FROM django_jobs WHERE job_id = %s;",
-                        (job_id,))
+                    cursor.execute("SELECT * FROM django_jobs WHERE job_id = %s;", (job_id,))
                     db_job = cursor.fetchone()
 
                     if db_job is None:
@@ -196,19 +194,24 @@ class TestJobDatabase(TransactionTestCase):
 
                         self.assertEqual(job_from_response.job_id, db_job_dict['job_id'], "Job ID mismatch")
                         self.assertEqual(job_from_response.job_title, db_job_dict['job_title'], "Job Title mismatch")
-                        self.assertEqual(job_from_response.company_name, db_job_dict['company_name'], "Company Name mismatch")
-                        self.assertEqual(job_from_response.job_description, db_job_dict['job_description'], "Job Description mismatch")
+                        self.assertEqual(job_from_response.company_name, db_job_dict['company_name'],
+                                         "Company Name mismatch")
+                        self.assertEqual(job_from_response.job_description, db_job_dict['job_description'],
+                                         "Job Description mismatch")
                         self.assertEqual(job_from_response.location, db_job_dict['location'], "Location mismatch")
                         self.assertEqual(job_from_response.min_salary, db_job_dict['min_salary'], "Min Salary mismatch")
                         self.assertEqual(job_from_response.max_salary, db_job_dict['max_salary'], "Max Salary mismatch")
-                        self.assertEqual(job_from_response.salary_time, db_job_dict['salary_time'], "Salary Time mismatch")
-                        self.assertEqual(job_from_response.posted_date, db_job_dict['posted_date'], "Posted Date mismatch")
+                        self.assertEqual(job_from_response.salary_time, db_job_dict['salary_time'],
+                                         "Salary Time mismatch")
+                        self.assertEqual(job_from_response.posted_date, db_job_dict['posted_date'],
+                                         "Posted Date mismatch")
                         self.assertEqual(job_from_response.url, db_job_dict['url'], "URL mismatch")
                         self.assertEqual(job_from_response.remote, db_job_dict['remote'], "Remote mismatch")
                     else:
                         response_content = response.content.decode('utf-8')
                         for field, value in db_job_dict.items():
-                            self.assertIn(str(value), response_content, f"Field '{field}' not found in response content")
+                            self.assertIn(str(value), response_content,
+                                          f"Field '{field}' not found in response content")
 
         except psycopg.OperationalError as e:
             self.fail(f"Error querying test database: {e}")

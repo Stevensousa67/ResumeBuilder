@@ -135,9 +135,11 @@ class EditUserWizard(SessionWizardView):
 
     def done(self, form_list, form_dict, **kwargs):
         candidate_form = form_dict['candidate']
-        experience_formset = form_dict['experience']
-        project_formset = form_dict['projects']
-        reference_formset = form_dict['references']
+        formsets = {
+            'experience': form_dict['experience'],
+            'projects': form_dict['projects'],
+            'references': form_dict['references'],
+        }
 
         # Save or update Candidate
         candidate = candidate_form.save(commit=False)
@@ -145,36 +147,18 @@ class EditUserWizard(SessionWizardView):
         candidate.email = self.request.user.email
         candidate.save()
 
-        # Save related formsets
-        for experience_form in experience_formset:
-            if experience_form.has_changed():
-                if experience_form.cleaned_data.get('DELETE', False):
-                    if experience_form.instance.pk:
-                        experience_form.instance.delete()
-                else:
-                    experience = experience_form.save(commit=False)
-                    experience.candidate = candidate
-                    experience.save()
+        def save_formset_items(formset, candidate):
+            for form in formset:
+                if form.has_changed():
+                    if form.cleaned_data.get('DELETE', False) and form.instance.pk:
+                        form.instance.delete()
+                    else:
+                        item = form.save(commit=False)
+                        item.candidate = candidate
+                        item.save()
 
-        for project_form in project_formset:
-            if project_form.has_changed():
-                if project_form.cleaned_data.get('DELETE', False):
-                    if project_form.instance.pk:
-                        project_form.instance.delete()
-                else:
-                    project = project_form.save(commit=False)
-                    project.candidate = candidate
-                    project.save()
-
-        for reference_form in reference_formset:
-            if reference_form.has_changed():
-                if reference_form.cleaned_data.get('DELETE', False):
-                    if reference_form.instance.pk:
-                        reference_form.instance.delete()
-                else:
-                    reference = reference_form.save(commit=False)
-                    reference.candidate = candidate
-                    reference.save()
+        for formset in formsets.values():
+            save_formset_items(formset, candidate)
 
         messages.success(self.request, "Profile updated successfully!")
         return HttpResponseRedirect(reverse('jobs:jobs_list'))

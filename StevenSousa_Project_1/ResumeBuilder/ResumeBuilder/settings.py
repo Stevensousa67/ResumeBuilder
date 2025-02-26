@@ -15,14 +15,15 @@ from decouple import config, AutoConfig
 import os
 import sys
 
-TESTING = 'test' in sys.argv # Auto-detect if running tests
+# Auto-detect if running tests
+TESTING = 'test' in sys.argv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 env_path = os.path.join(BASE_DIR, '.env')
 if os.path.exists(env_path):
-    config = AutoConfig(search_path=BASE_DIR)
+    env_config = AutoConfig(search_path=BASE_DIR)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
