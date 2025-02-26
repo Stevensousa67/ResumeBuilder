@@ -40,9 +40,9 @@ jobs:
       postgres:
         image: postgres:14
         env:
-          DB_NAME_DEFAULT: ${{ secrets.DB_NAME_DEFAULT }}
-          DB_USER_DEFAULT: ${{ secrets.DB_USER_DEFAULT }}
-          DB_PASSWORD_DEFAULT: ${{ secrets.DB_PASSWORD_DEFAULT }}
+          POSTGRES_DB: ${{ secrets.DB_NAME_DEFAULT }}
+          POSTGRES_USER: ${{ secrets.DB_USER_DEFAULT }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD_DEFAULT }}
         ports:
           - 5432:5432
         options: >-
