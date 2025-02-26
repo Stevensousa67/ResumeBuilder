@@ -12,7 +12,6 @@ import os
 from pathlib import Path
 from decouple import AutoConfig
 from django.core.management.base import BaseCommand
-from django.conf import settings
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
 env_path = os.path.join(BASE_DIR, '.env')
@@ -25,8 +24,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Get database credentials from .env
-        db_name = config('DB_NAME') if not settings.TESTING else config('DB_NAME_TEST')
-        db_user = config('DB_USER') if not settings.TESTING else config('DB_USER_TEST')
+        db_name = config('DB_NAME')
+        db_user = config('DB_USER')
         db_password = config('DB_PASSWORD')
         db_host = config('DB_HOST_DEFAULT')
         db_port = config('DB_PORT_DEFAULT')
