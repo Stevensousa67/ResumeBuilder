@@ -9,6 +9,7 @@ from formtools.wizard.views import SessionWizardView
 from .forms import SignupForm, CandidateForm, ReferenceFormSet, ProjectFormSet, ExperienceFormSet
 from .models import Candidate, Experience, Project, Reference
 from django.contrib.auth.views import LoginView
+from django.core.exceptions import ObjectDoesNotExist
 
 
 # Custom Login View
@@ -74,7 +75,7 @@ class EditUserWizard(SessionWizardView):
                 return Candidate.objects.get(user=self.request.user)
             except Candidate.DoesNotExist:
                 return None
-        return None  # Formsets don’t need instance here; handled in get_form
+        return None
 
     def get_form_initial(self, step):
         if step == 'candidate':
@@ -96,33 +97,41 @@ class EditUserWizard(SessionWizardView):
                 return {}
         return None  # No initial data needed for formsets; instances handle it
 
-    def get_form(self, step=None, data=None, files=None):
-        if step is None:
-            step = self.steps.current
+    def _get_formset_class(self, step):
+        """Return the formset class for a given step."""
+        formset_map = {
+            'experience': ExperienceFormSet,
+            'projects': ProjectFormSet,
+            'references': ReferenceFormSet,
+        }
+        return formset_map.get(step)
 
-        # Get the base form or formset
+    def _get_formset(self, step, data, files, candidate=None):
+        """Return an instantiated formset for the given step."""
+        formset_class = self._get_formset_class(step)
+        if not formset_class:
+            return None
+        prefix = step if step != 'experience' else 'experiences'
+        kwargs = {'data': data, 'files': files, 'prefix': prefix}
+        if candidate:
+            kwargs['instance'] = candidate
+        return formset_class(**kwargs)
+
+    def get_form(self, step=None, data=None, files=None):
+        """Get the form or formset for the current step."""
+        step = step or self.steps.current
         form = super().get_form(step, data, files)
 
-        # Handle formsets
-        if step in ['experience', 'projects', 'references']:
-            try:
-                candidate = Candidate.objects.get(user=self.request.user)
-                if step == 'experience':
-                    return ExperienceFormSet(data=data, files=files, instance=candidate, prefix='experiences')
-                elif step == 'projects':
-                    return ProjectFormSet(data=data, files=files, instance=candidate, prefix='projects')
-                elif step == 'references':
-                    return ReferenceFormSet(data=data, files=files, instance=candidate, prefix='references')
-            except Candidate.DoesNotExist:
-                # If no Candidate exists yet, return an empty formset (extra=0 means no forms)
-                if step == 'experience':
-                    return ExperienceFormSet(data=data, files=files, prefix='experiences')
-                elif step == 'projects':
-                    return ProjectFormSet(data=data, files=files, prefix='projects')
-                elif step == 'references':
-                    return ReferenceFormSet(data=data, files=files, prefix='references')
+        # Early return for non-formset steps (e.g., 'candidate')
+        if step not in ['experience', 'projects', 'references']:
+            return form
 
-        return form
+        # Handle formsets with or without a candidate instance
+        try:
+            candidate = Candidate.objects.get(user=self.request.user)
+            return self._get_formset(step, data, files, candidate)
+        except ObjectDoesNotExist:
+            return self._get_formset(step, data, files)
 
     def get_form_kwargs(self, step):
         kwargs = super().get_form_kwargs(step)
