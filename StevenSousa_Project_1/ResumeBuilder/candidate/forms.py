@@ -131,7 +131,7 @@ ExperienceFormSet = forms.inlineformset_factory(
     Experience,
     form=ExperienceForm,
     fields=['title', 'company', 'start_date', 'end_date', 'description', 'present'],
-    extra=1,
+    extra=0,
     can_delete=True
 )
 ProjectFormSet = forms.inlineformset_factory(
@@ -139,7 +139,7 @@ ProjectFormSet = forms.inlineformset_factory(
     Project,
     form=ProjectForm,
     fields=['title', 'description'],
-    extra=1,
+    extra=0,
     can_delete=True
 )
 ReferenceFormSet = forms.inlineformset_factory(
@@ -147,6 +147,6 @@ ReferenceFormSet = forms.inlineformset_factory(
     Reference,
     form=ReferenceForm,
     fields=['first_name', 'last_name', 'phone', 'email', 'relationship'],
-    extra=1,
+    extra=0,
     can_delete=True
 )
