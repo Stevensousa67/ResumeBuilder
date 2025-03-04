@@ -40,6 +40,7 @@
                         <div id="experiences-forms" class="formset-container">
                             {% for subform in form %}
                                 <div class="form-item experiences-form">
+                                    {{ subform.id }}
                                     <div class="row">
                                         {% for field in subform %}
                                             {% if field.name not in 'id,candidate' %}
@@ -63,6 +64,9 @@
                                                 {% endif %}
                                             {% endif %}
                                         {% endfor %}
+                                        {% if subform.errors %}
+                                            <div class="alert alert-danger">{{ subform.errors }}</div>
+                                        {% endif %}
                                         {% if subform.can_delete %}
                                             <div class="col-12 form-check mb-3">
                                                 <input type="checkbox" name="{{ subform.prefix }}-DELETE"
@@ -109,6 +113,7 @@
                         <div id="projects-forms" class="formset-container">
                             {% for subform in form %}
                                 <div class="form-item projects-form">
+                                    {{ subform.id }}
                                     <div class="row">
                                         {% for field in subform %}
                                             {% if field.name not in 'id,candidate' %}
@@ -179,6 +184,7 @@
                         <div id="references-forms" class="formset-container">
                             {% for subform in form %}
                                 <div class="form-item references-form">
+                                    {{ subform.id }}
                                     <div class="row">
                                         {% for field in subform %}
                                             {% if field.name not in 'id,candidate' %}
@@ -238,7 +244,7 @@
                         {% if step_name == 'candidate' %}
                             Next: Experience(s)
                         {% elif step_name == 'experience' %}
-                            Next: Project(s)
+                            Next: Projects
                         {% elif step_name == 'projects' %}
                             Next: References
                         {% else %}
