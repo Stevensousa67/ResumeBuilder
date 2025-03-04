@@ -97,25 +97,31 @@ class EditUserWizard(SessionWizardView):
         return None  # No initial data needed for formsets; instances handle it
 
     def get_form(self, step=None, data=None, files=None):
-        # Get the form for the current step
+        if step is None:
+            step = self.steps.current
+
+        # Get the base form or formset
         form = super().get_form(step, data, files)
+
+        # Handle formsets
         if step in ['experience', 'projects', 'references']:
             try:
                 candidate = Candidate.objects.get(user=self.request.user)
                 if step == 'experience':
-                    form = ExperienceFormSet(data=data, files=files, instance=candidate, prefix='experiences')
+                    return ExperienceFormSet(data=data, files=files, instance=candidate, prefix='experiences')
                 elif step == 'projects':
-                    form = ProjectFormSet(data=data, files=files, instance=candidate, prefix='projects')
+                    return ProjectFormSet(data=data, files=files, instance=candidate, prefix='projects')
                 elif step == 'references':
-                    form = ReferenceFormSet(data=data, files=files, instance=candidate, prefix='references')
+                    return ReferenceFormSet(data=data, files=files, instance=candidate, prefix='references')
             except Candidate.DoesNotExist:
-                # If no Candidate exists, return an empty formset
+                # If no Candidate exists yet, return an empty formset (extra=0 means no forms)
                 if step == 'experience':
-                    form = ExperienceFormSet(data=data, files=files, prefix='experiences')
+                    return ExperienceFormSet(data=data, files=files, prefix='experiences')
                 elif step == 'projects':
-                    form = ProjectFormSet(data=data, files=files, prefix='projects')
+                    return ProjectFormSet(data=data, files=files, prefix='projects')
                 elif step == 'references':
-                    form = ReferenceFormSet(data=data, files=files, prefix='references')
+                    return ReferenceFormSet(data=data, files=files, prefix='references')
+
         return form
 
     def get_form_kwargs(self, step):
