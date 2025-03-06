@@ -50,6 +50,9 @@ INSTALLED_APPS = [
     'formtools',
 ]
 
+# Custom User Model
+AUTH_USER_MODEL = 'candidate.User'
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

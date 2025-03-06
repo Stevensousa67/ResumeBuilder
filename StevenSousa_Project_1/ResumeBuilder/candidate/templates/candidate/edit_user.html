@@ -5,19 +5,31 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'candidate/css/edit_user.css' %}">
+    <style>
+        .form-section {
+            text-align: center;
+        }
+        .form-section .row {
+            justify-content: center;
+        }
+        #new-profile-form {
+            display: none;
+            margin-top: 15px;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
     <div class="container h-100 d-flex flex-column justify-content-center py-5">
         <h1 class="mb-4 text-center">Edit User - Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</h1>
         <div class="card shadow-lg p-4">
-            <form method="post" id="signup-form" class="flex-grow-1">
+            <form method="post" id="edit-user-form" class="flex-grow-1">
                 {% csrf_token %}
                 {{ wizard.management_form }}
 
-                {% if step_name == 'candidate' %}
+                {% if step_name == 'user' %}
                     <div class="form-section">
-                        <h2 class="h4 mb-3">Candidate Info</h2>
+                        <h2 class="h4 mb-3">User Info</h2>
                         <div class="row">
                             {% for field in form %}
                                 <div class="col-md-6 mb-3">
@@ -33,6 +45,24 @@
                             {% endfor %}
                         </div>
                     </div>
+                {% elif step_name == 'profile_select' %}
+                    <div class="form-section">
+                        <h2 class="h4 mb-3">Select Profile</h2>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.profile_name.id_for_label }}" class="form-label">{{ form.profile_name.label }}</label>
+                                {{ form.profile_name }}
+                                {% if form.profile_name.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.profile_name.errors|join:", " }}</div>
+                                {% endif %}
+                                <button type="button" class="btn btn-outline-primary mt-2" id="add-profile-btn">Add Profile</button>
+                                <div id="new-profile-form">
+                                    <input type="text" name="new_profile_name" id="new_profile_name" class="form-control" placeholder="Enter profile name">
+                                    <small class="form-text text-muted">Click 'Next' to save and use this profile.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 {% elif step_name == 'experience' %}
                     <div class="form-section">
                         <h2 class="h4 mb-3">Experience</h2>
@@ -43,7 +73,7 @@
                                     {{ subform.id }}
                                     <div class="row">
                                         {% for field in subform %}
-                                            {% if field.name not in 'id,candidate' %}
+                                            {% if field.name != 'id' %}
                                                 {% if field.name == 'present' %}
                                                     <div class="col-12 mb-3">
                                                         {{ field }} <label for="{{ field.id_for_label }}"
@@ -64,30 +94,24 @@
                                                 {% endif %}
                                             {% endif %}
                                         {% endfor %}
-                                        {% if subform.errors %}
-                                            <div class="alert alert-danger">{{ subform.errors }}</div>
-                                        {% endif %}
                                         {% if subform.can_delete %}
                                             <div class="col-12 form-check mb-3">
                                                 <input type="checkbox" name="{{ subform.prefix }}-DELETE"
                                                        class="form-check-input"
                                                        id="{{ subform.prefix }}-delete">
-                                                <label class="form-check-label" for="{{ subform.prefix }}-delete">Delete
-                                                    this
-                                                    experience</label>
+                                                <label class="form-check-label" for="{{ subform.prefix }}-delete">Delete this experience</label>
                                             </div>
                                         {% endif %}
                                     </div>
                                 </div>
                             {% endfor %}
                         </div>
-                        <button type="button" class="btn btn-outline-primary mb-3" id="add-experience">Add Experience
-                        </button>
+                        <button type="button" class="btn btn-outline-primary mb-3" id="add-experience">Add Experience</button>
                         <div id="empty-experiences-form" class="hidden-form">
                             <div class="form-item">
                                 <div class="row">
                                     {% for field in form.empty_form %}
-                                        {% if field.name not in 'id,candidate' %}
+                                        {% if field.name != 'id' %}
                                             {% if field.name == 'present' %}
                                                 <div class="col-12 mb-3">
                                                     {{ field }} <label for="{{ field.id_for_label }}"
@@ -116,26 +140,15 @@
                                     {{ subform.id }}
                                     <div class="row">
                                         {% for field in subform %}
-                                            {% if field.name not in 'id,candidate' %}
-                                                {% if field.name == 'title' %}
-                                                    <div class="col-md-6 mb-3">
-                                                        <label for="{{ field.id_for_label }}"
-                                                               class="form-label">{{ field.label }}</label>
-                                                        {{ field }}
-                                                        {% if field.errors %}
-                                                            <div class="invalid-feedback d-block">{{ field.errors|join:", " }}</div>
-                                                        {% endif %}
-                                                    </div>
-                                                {% elif field.name == 'description' %}
-                                                    <div class="col-md-6 mb-3">
-                                                        <label for="{{ field.id_for_label }}"
-                                                               class="form-label">{{ field.label }}</label>
-                                                        {{ field }}
-                                                        {% if field.errors %}
-                                                            <div class="invalid-feedback d-block">{{ field.errors|join:", " }}</div>
-                                                        {% endif %}
-                                                    </div>
-                                                {% endif %}
+                                            {% if field.name != 'id' %}
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="{{ field.id_for_label }}"
+                                                           class="form-label">{{ field.label }}</label>
+                                                    {{ field }}
+                                                    {% if field.errors %}
+                                                        конкурент <div class="invalid-feedback d-block">{{ field.errors|join:", " }}</div>
+                                                    {% endif %}
+                                                </div>
                                             {% endif %}
                                         {% endfor %}
                                         {% if subform.can_delete %}
@@ -143,9 +156,7 @@
                                                 <input type="checkbox" name="{{ subform.prefix }}-DELETE"
                                                        class="form-check-input"
                                                        id="{{ subform.prefix }}-delete">
-                                                <label class="form-check-label" for="{{ subform.prefix }}-delete">Delete
-                                                    this
-                                                    project</label>
+                                                <label class="form-check-label" for="{{ subform.prefix }}-delete">Delete this project</label>
                                             </div>
                                         {% endif %}
                                     </div>
@@ -157,20 +168,12 @@
                             <div class="form-item">
                                 <div class="row">
                                     {% for field in form.empty_form %}
-                                        {% if field.name not in 'id,candidate' %}
-                                            {% if field.name == 'title' %}
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="{{ field.id_for_label }}"
-                                                           class="form-label">{{ field.label }}</label>
-                                                    {{ field }}
-                                                </div>
-                                            {% elif field.name == 'description' %}
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="{{ field.id_for_label }}"
-                                                           class="form-label">{{ field.label }}</label>
-                                                    {{ field }}
-                                                </div>
-                                            {% endif %}
+                                        {% if field.name != 'id' %}
+                                            <div class="col-md-6 mb-3">
+                                                <label for="{{ field.id_for_label }}"
+                                                       class="form-label">{{ field.label }}</label>
+                                                {{ field }}
+                                            </div>
                                         {% endif %}
                                     {% endfor %}
                                 </div>
@@ -187,7 +190,7 @@
                                     {{ subform.id }}
                                     <div class="row">
                                         {% for field in subform %}
-                                            {% if field.name not in 'id,candidate' %}
+                                            {% if field.name != 'id' %}
                                                 <div class="col-md-6 mb-3">
                                                     <label for="{{ field.id_for_label }}"
                                                            class="form-label">{{ field.label }}</label>
@@ -203,22 +206,19 @@
                                                 <input type="checkbox" name="{{ subform.prefix }}-DELETE"
                                                        class="form-check-input"
                                                        id="{{ subform.prefix }}-delete">
-                                                <label class="form-check-label" for="{{ subform.prefix }}-delete">Delete
-                                                    this
-                                                    reference</label>
+                                                <label class="form-check-label" for="{{ subform.prefix }}-delete">Delete this reference</label>
                                             </div>
                                         {% endif %}
                                     </div>
                                 </div>
                             {% endfor %}
                         </div>
-                        <button type="button" class="btn btn-outline-primary mb-3" id="add-reference">Add Reference
-                        </button>
+                        <button type="button" class="btn btn-outline-primary mb-3" id="add-reference">Add Reference</button>
                         <div id="empty-references-form" class="hidden-form">
                             <div class="form-item">
                                 <div class="row">
                                     {% for field in form.empty_form %}
-                                        {% if field.name not in 'id,candidate' %}
+                                        {% if field.name != 'id' %}
                                             <div class="col-md-6 mb-3">
                                                 <label for="{{ field.id_for_label }}"
                                                        class="form-label">{{ field.label }}</label>
@@ -238,16 +238,18 @@
                                 class="btn btn-outline-secondary">Previous
                         </button>
                     {% else %}
-                        <span></span> <!-- Placeholder for alignment -->
+                        <span></span>
                     {% endif %}
                     <button type="submit" class="btn btn-primary">
-                        {% if step_name == 'candidate' %}
-                            Next: Experience(s)
+                        {% if step_name == 'user' %}
+                            Next: Select Profile
+                        {% elif step_name == 'profile_select' %}
+                            Next: Experience
                         {% elif step_name == 'experience' %}
                             Next: Projects
                         {% elif step_name == 'projects' %}
                             Next: References
-                        {% else %}
+                        {% elif step_name == 'references' %}
                             Save
                         {% endif %}
                     </button>
@@ -259,4 +261,14 @@
 
 {% block extra_js %}
     <script src="{% static 'candidate/javascript/edit_user.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const addProfileBtn = document.getElementById('add-profile-btn');
+            const newProfileForm = document.getElementById('new-profile-form');
+
+            addProfileBtn.addEventListener('click', () => {
+                newProfileForm.style.display = newProfileForm.style.display === 'none' ? 'block' : 'none';
+            });
+        });
+    </script>
 {% endblock %}

@@ -1,6 +1,5 @@
 from django import forms
-from django.contrib.auth.models import User
-from .models import Candidate, Reference, Project, Experience
+from .models import User, Profile, Reference, Project, Experience
 
 
 # Sign Up Form
@@ -26,10 +25,10 @@ class SignupForm(forms.Form):
         return cleaned_data
 
 
-# Candidate Form
-class CandidateForm(forms.ModelForm):
+# User Form
+class UserForm(forms.ModelForm):
     class Meta:
-        model = Candidate
+        model = User
         fields = ['first_name', 'last_name', 'email', 'phone', 'website', 'address', 'education', 'major',
                   'skills', 'courses']
         widgets = {
@@ -55,6 +54,14 @@ class CandidateForm(forms.ModelForm):
         email = self.cleaned_data['email']
         return email.lower()
 
+# Profile Form
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['profile_name']
+        widgets = {
+            'profile_name': forms.TextInput(attrs={'class': 'form-control'}),
+        }
 
 # Reference Form
 class ReferenceForm(forms.ModelForm):
@@ -68,6 +75,12 @@ class ReferenceForm(forms.ModelForm):
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'relationship': forms.TextInput(attrs={'class': 'form-control'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)  # Pass current user from view
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['profile'].queryset = Profile.objects.filter(user=user)  # Limit to user's profiles
 
     def clean_phone(self):
         phone = self.cleaned_data['phone']
@@ -90,6 +103,11 @@ class ProjectForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['profile'].queryset = Profile.objects.filter(user=user)
 
 # Experience Form
 class ExperienceForm(forms.ModelForm):
@@ -110,6 +128,12 @@ class ExperienceForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['profile'].queryset = Profile.objects.filter(user=user)
+
     def clean(self):
         cleaned_data = super().clean()
         start_date = cleaned_data.get('start_date')
@@ -127,7 +151,7 @@ class ExperienceForm(forms.ModelForm):
 
 # Formsets
 ExperienceFormSet = forms.inlineformset_factory(
-    Candidate,
+    Profile,
     Experience,
     form=ExperienceForm,
     fields=['title', 'company', 'start_date', 'end_date', 'description', 'present'],
@@ -135,7 +159,7 @@ ExperienceFormSet = forms.inlineformset_factory(
     can_delete=True
 )
 ProjectFormSet = forms.inlineformset_factory(
-    Candidate,
+    Profile,
     Project,
     form=ProjectForm,
     fields=['title', 'description'],
@@ -143,7 +167,7 @@ ProjectFormSet = forms.inlineformset_factory(
     can_delete=True
 )
 ReferenceFormSet = forms.inlineformset_factory(
-    Candidate,
+    Profile,
     Reference,
     form=ReferenceForm,
     fields=['first_name', 'last_name', 'phone', 'email', 'relationship'],
