@@ -24,7 +24,7 @@
 - Start the .venv by running the command "source .venv/bin/activate"
 - Optional: upgrade pip by running the command "pip install --upgrade pip"
 - Install the dependencies by running the command "pip install -r requirements.txt"
-- cd into ResumeBuilder/ and run the command "python manage.py ensure_db". This will connect to your local PostgreSQL server and check if DB_NAME, DB_USER exists in the server. If not, it will create them and assign DB_PASSWORD to the new user.
+- cd into ResumeBuilder/ and run the command "python manage.py create_db". This will connect to your local PostgreSQL server and check if DB_NAME, DB_USER exists in the server. If not, it will create them and assign DB_PASSWORD to the new user.
 - Create Django managed tables inside the newly created database by running "python manage.py migrate"
 - Add json jobs into Django managed table by running the command "python manage.py data_processing"
 - Create a Django superuser by running the command "python manage.py createsuperuser" and follow the terminal instructions
