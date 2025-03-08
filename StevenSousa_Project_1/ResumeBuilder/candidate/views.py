@@ -212,8 +212,8 @@ class EditUserWizard(SessionWizardView):
             profile = profile_data.get('existing_profile')
         else:  # profile_option == 'new'
             profile_name = profile_data.get('new_profile_name')
-            # Create the new profile only here
-            profile = Profile.objects.create(
+            # Check if profile already exists before creating a new one
+            profile, created = Profile.objects.get_or_create(
                 profile_name=profile_name,
                 user=self.request.user
             )
