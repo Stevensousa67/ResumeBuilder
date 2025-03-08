@@ -54,6 +54,7 @@ class UserForm(forms.ModelForm):
         email = self.cleaned_data['email']
         return email.lower()
 
+
 # Profile Form
 class ProfileForm(forms.ModelForm):
     class Meta:
@@ -62,6 +63,45 @@ class ProfileForm(forms.ModelForm):
         widgets = {
             'profile_name': forms.TextInput(attrs={'class': 'form-control'}),
         }
+
+
+class ProfileSelectForm(forms.Form):
+    profile_option = forms.ChoiceField(
+        choices=[('existing', 'Select Existing Profile'), ('new', 'Create New Profile')],
+        widget=forms.RadioSelect,
+        initial='existing'
+    )
+    existing_profile = forms.ModelChoiceField(
+        queryset=Profile.objects.none(),  # This is dynamically updated based on user
+        widget=forms.Select,
+        required=False,
+        empty_label="Choose an existing profile"
+    )
+    new_profile_name = forms.CharField(
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'Enter a new profile name'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['existing_profile'].queryset = Profile.objects.filter(user=user)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        profile_option = cleaned_data.get('profile_option')
+        existing_profile = cleaned_data.get('existing_profile')
+        new_profile_name = cleaned_data.get('new_profile_name')
+
+        if profile_option == 'existing' and not existing_profile:
+            raise forms.ValidationError("You must select an existing profile.")
+        elif profile_option == 'new' and not new_profile_name:
+            raise forms.ValidationError("You must enter a new profile name.")
+
+        return cleaned_data
+
 
 # Reference Form
 class ReferenceForm(forms.ModelForm):
@@ -108,6 +148,7 @@ class ProjectForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if user:
             self.fields['profile'].queryset = Profile.objects.filter(user=user)
+
 
 # Experience Form
 class ExperienceForm(forms.ModelForm):

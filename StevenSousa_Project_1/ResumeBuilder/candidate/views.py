@@ -6,7 +6,8 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from formtools.wizard.views import SessionWizardView
 from django.forms.widgets import Select
-from .forms import SignupForm, UserForm, ProfileForm, ExperienceFormSet, ProjectFormSet, ReferenceFormSet
+from .forms import SignupForm, UserForm, ProfileForm, ProfileSelectForm, ExperienceFormSet, ProjectFormSet, \
+    ReferenceFormSet
 from .models import User, Profile, Experience, Project, Reference
 from django.contrib.auth.views import LoginView
 from django.core.exceptions import ObjectDoesNotExist
@@ -63,7 +64,7 @@ def create_profile(request):
 class EditUserWizard(SessionWizardView):
     form_list = [
         ('user', UserForm),
-        ('profile_select', ProfileForm),
+        ('profile_select', ProfileSelectForm),
         ('experience', ExperienceFormSet),
         ('projects', ProjectFormSet),
         ('references', ReferenceFormSet),
@@ -122,44 +123,67 @@ class EditUserWizard(SessionWizardView):
 
     def get_form(self, step=None, data=None, files=None):
         step = step or self.steps.current
-        if step == 'profile_select':
-            profiles = Profile.objects.filter(user=self.request.user)
-            choices = [(p.id, p.profile_name) for p in profiles]
-            form = ProfileForm(data=data, files=files)
-            form.fields['profile_name'].widget = Select(
-                choices=choices,
-                attrs={'class': 'form-control', 'id': 'profile_select_dropdown'}
-            )
-            form.fields['profile_name'].label = "Select Profile"
-            if data and 'new_profile_name' in data and data['new_profile_name']:
-                new_profile = Profile(user=self.request.user, profile_name=data['new_profile_name'])
-                new_profile.save()
-                choices.append((new_profile.id, new_profile.profile_name))
-                form.fields['profile_name'].widget.choices = choices
-                form.fields['profile_name'].initial = new_profile.id
-            elif not profiles and not data:
-                profile_count = Profile.objects.filter(user=self.request.user).count()
-                default_name = f"Profile {profile_count + 1}"
-                new_profile = Profile(user=self.request.user, profile_name=default_name)
-                new_profile.save()
-                choices.append((new_profile.id, new_profile.profile_name))
-                form.fields['profile_name'].widget.choices = choices
-                form.fields['profile_name'].initial = new_profile.id
-            return form
-        elif step in ['experience', 'projects', 'references']:
-            profile_id = self.get_cleaned_data_for_step('profile_select')
-            if profile_id and profile_id['profile_name']:
-                profile = Profile.objects.get(id=profile_id['profile_name'], user=self.request.user)
-                return self._get_formset(step, data, files, profile)
-            return self._get_formset(step, data, files)
-        return super().get_form(step, data, files)
+        prefix = self.get_form_prefix(step)
+        print(f"Step: {step}, Prefix: {prefix}")  # Debug
+        try:
+            if step == 'profile_select':
+                form = ProfileSelectForm(data=data, files=files, user=self.request.user, prefix=prefix)
+                print(f"ProfileSelectForm fields: {form.fields.keys()}")  # Debug
+                return form
+            elif step in ['experience', 'projects', 'references']:
+                profile_data = self.get_cleaned_data_for_step('profile_select')
+                if profile_data:
+                    profile_option = profile_data.get('profile_option')
+                    if profile_option == 'existing':
+                        existing_profile = profile_data.get('existing_profile')
+                        profile_id = existing_profile.id if existing_profile else None  # Extract ID
+                        if profile_id:
+                            try:
+                                profile = Profile.objects.get(id=profile_id, user=self.request.user)
+                                return self._get_formset(step, data, files, profile)
+                            except Profile.DoesNotExist:
+                                print(f"Profile with id {profile_id} not found for user {self.request.user}")
+                                return self._get_formset(step, data, files)  # Fallback to empty formset
+                        else:
+                            return self._get_formset(step, data, files)  # Fallback if no ID
+                    elif profile_option == 'new':
+                        return self._get_formset(step, data, files, profile=None)  # Explicitly pass None
+                return self._get_formset(step, data, files, profile=None)
+            return super().get_form(step, data, files)
+        except Exception as e:
+            print(f"Error in get_form for step {step}: {str(e)}")
+            raise
+
+    def process_step(self, form):
+        if self.steps.current == 'profile_select':
+            cleaned_data = form.cleaned_data
+            profile_option = cleaned_data.get('profile_option')
+
+            if profile_option == 'new':
+                new_profile_name = cleaned_data.get('new_profile_name', '').strip()
+                if new_profile_name:
+                    profile, created = Profile.objects.get_or_create(
+                        user=self.request.user,
+                        profile_name=new_profile_name
+                    )
+                    form.cleaned_data['existing_profile'] = profile.id
+                    self.storage.set_step_data(self.steps.current, {
+                        'profile_select-existing_profile': str(profile.id),
+                        'profile_select-profile_option': 'new',
+                    })
+                else:
+                    form.add_error('new_profile_name', "Please enter a new profile name.")
+            elif profile_option == 'existing':
+                if not cleaned_data.get('existing_profile'):
+                    form.add_error('existing_profile', "Please select an existing profile.")
+        return self.get_form_step_data(form)
 
     def get_form_kwargs(self, step):
         kwargs = super().get_form_kwargs(step)
         if step in ['experience', 'projects', 'references']:
-            profile_id = self.get_cleaned_data_for_step('profile_select')
-            if profile_id and profile_id['profile_name']:
-                profile = Profile.objects.get(id=profile_id['profile_name'], user=self.request.user)
+            profile_data = self.get_cleaned_data_for_step('profile_select')
+            if profile_data and profile_data.get('existing_profile'):
+                profile = Profile.objects.get(id=profile_data['existing_profile'], user=self.request.user)
                 if step == 'experience':
                     kwargs['queryset'] = Experience.objects.filter(profile=profile)
                 elif step == 'projects':
@@ -168,40 +192,44 @@ class EditUserWizard(SessionWizardView):
                     kwargs['queryset'] = Reference.objects.filter(profile=profile)
         return kwargs
 
-    def done(self, form_list, form_dict, **kwargs):
-        user_form = form_dict['user']
-        profile_select = form_dict['profile_select']
-        formsets = {
-            'experience': form_dict['experience'],
-            'projects': form_dict['projects'],
-            'references': form_dict['references'],
-        }
+    def done(self, form_list, **kwargs):
+        # Extract data from all steps
+        user_form = form_list[0]  # UserForm (first step)
+        profile_select_form = form_list[1]  # ProfileSelectForm (second step)
+        experience_formset = form_list[2]  # ExperienceFormSet
+        projects_formset = form_list[3]  # ProjectFormSet
+        references_formset = form_list[4]  # ReferenceFormSet
 
-        # Save User
+        # Save user data
         user = user_form.save(commit=False)
-        user.email = self.request.user.email
         user.save()
 
-        # Profile is always selected or created
-        profile_id = profile_select.cleaned_data['profile_name']
-        profile = Profile.objects.get(id=profile_id, user=self.request.user)
+        # Determine if we're creating a new profile or using an existing one
+        profile_data = profile_select_form.cleaned_data
+        profile_option = profile_data.get('profile_option')
 
-        # Save Formsets
-        def save_formset_items(formset, profile):
-            for form in formset:
-                if form.has_changed():
-                    if form.cleaned_data.get('DELETE', False) and form.instance.pk:
-                        form.instance.delete()
-                    else:
-                        item = form.save(commit=False)
-                        item.profile = profile
-                        item.save()
+        if profile_option == 'existing':
+            profile = profile_data.get('existing_profile')
+        else:  # profile_option == 'new'
+            profile_name = profile_data.get('new_profile_name')
+            # Create the new profile only here
+            profile = Profile.objects.create(
+                profile_name=profile_name,
+                user=self.request.user
+            )
 
-        for formset in formsets.values():
-            save_formset_items(formset, profile)
+        # Save formsets with the profile
+        experience_formset.instance = profile
+        experience_formset.save()
 
-        messages.success(self.request, "Profile updated successfully!")
-        return HttpResponseRedirect(reverse('jobs:jobs_list'))  # Changed redirect here
+        projects_formset.instance = profile
+        projects_formset.save()
+
+        references_formset.instance = profile
+        references_formset.save()
+
+        messages.success(self.request, "Profile saved successfully.")
+        return redirect('jobs:jobs_list')
 
     def get_context_data(self, form, **kwargs):
         context = super().get_context_data(form=form, **kwargs)

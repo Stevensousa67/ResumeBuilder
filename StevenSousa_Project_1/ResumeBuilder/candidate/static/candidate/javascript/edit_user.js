@@ -1,4 +1,52 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('Current step:', window.currentStep);
+
+    if (window.currentStep === 'profile_select') {
+        const radioButtons = document.querySelectorAll('input[name="profile_select-profile_option"]');
+        console.log('Radio buttons found:', radioButtons);  // Debug
+        console.log('Radio buttons count:', radioButtons.length);  // Debug
+        console.log('First radio button:', radioButtons[0]);  // Debug
+
+        const existingContainer = document.getElementById('existing-profile-container');
+        const newContainer = document.getElementById('new-profile-container');
+        console.log('Containers:', {existingContainer, newContainer});  // Debug
+
+        if (radioButtons.length === 0) {
+            console.error("No profile selection radio buttons found. Checking broader selector...");
+            const allRadios = document.querySelectorAll('input[type="radio"]');
+            console.log('All radio inputs:', allRadios);  // Debug
+            return;
+        }
+        if (!existingContainer || !newContainer) {
+            console.error("Profile containers missing.");
+            return;
+        }
+
+        console.log("Initial state:", {
+            existingContainer: existingContainer.style.display,
+            newContainer: newContainer.style.display,
+            selected: document.querySelector('input[name="profile_select-profile_option"]:checked')?.value
+        });
+
+        function toggleProfileSelection() {
+            const selectedValue = document.querySelector('input[name="profile_select-profile_option"]:checked')?.value;
+            console.log("Radio changed:", selectedValue);
+
+            if (selectedValue === 'new') {
+                newContainer.style.display = 'block';
+                existingContainer.style.display = 'none';
+            } else {
+                newContainer.style.display = 'none';
+                existingContainer.style.display = 'block';
+            }
+        }
+
+        toggleProfileSelection();
+        radioButtons.forEach(radio => {
+            radio.addEventListener('change', toggleProfileSelection);
+        });
+    }
+
     function getNextIndex(prefix) {
         const existingForms = document.querySelectorAll(`.${prefix}-form:not(#empty-${prefix}-form)`);
         let maxIndex = -1;
@@ -81,23 +129,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    document.addEventListener('change', event => {
-        if (event.target.matches("input[name^='experiences'][name$='-present']")) {
-            const form = event.target.closest('.experiences-form');
-            if (form) toggleEndDateField(form);
-        }
-    });
+    if (window.currentStep === 'experience') {
+        document.addEventListener('change', event => {
+            if (event.target.matches("input[name^='experiences'][name$='-present']")) {
+                const form = event.target.closest('.experiences-form');
+                if (form) toggleEndDateField(form);
+            }
+        });
 
-    document.querySelectorAll('.experiences-form').forEach(form => {
-        toggleEndDateField(form);
-    });
+        document.querySelectorAll('.experiences-form').forEach(form => {
+            toggleEndDateField(form);
+        });
+    }
 
     function bindAddButtons() {
-        const addButtons = {
-            'experiences': document.getElementById('add-experience'),
-            'projects': document.getElementById('add-project'),
-            'references': document.getElementById('add-reference')
-        };
+        const addButtons = {};
+
+        if (window.currentStep === 'experience') {
+            addButtons['experiences'] = document.getElementById('add-experience');
+        } else if (window.currentStep === 'projects') {
+            addButtons['projects'] = document.getElementById('add-project');
+        } else if (window.currentStep === 'references') {
+            addButtons['references'] = document.getElementById('add-reference');
+        }
 
         Object.entries(addButtons).forEach(([prefix, button]) => {
             if (button && !button.dataset.listenerAdded) {
@@ -114,7 +168,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     bindAddButtons();
-    document.getElementById('signup-form').addEventListener('submit', () => {
-        setTimeout(bindAddButtons, 100);
-    });
+
+    const editUserForm = document.getElementById('edit-user-form');
+    if (editUserForm) {
+        editUserForm.addEventListener('submit', () => {
+            setTimeout(bindAddButtons, 100);
+        });
+    } else {
+        console.error('edit-user-form not found');
+    }
 });

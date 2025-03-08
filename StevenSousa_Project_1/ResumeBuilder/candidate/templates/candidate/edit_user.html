@@ -5,18 +5,6 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'candidate/css/edit_user.css' %}">
-    <style>
-        .form-section {
-            text-align: center;
-        }
-        .form-section .row {
-            justify-content: center;
-        }
-        #new-profile-form {
-            display: none;
-            margin-top: 15px;
-        }
-    </style>
 {% endblock %}
 
 {% block content %}
@@ -46,21 +34,29 @@
                         </div>
                     </div>
                 {% elif step_name == 'profile_select' %}
-                    <div class="form-section">
-                        <h2 class="h4 mb-3">Select Profile</h2>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.profile_name.id_for_label }}" class="form-label">{{ form.profile_name.label }}</label>
-                                {{ form.profile_name }}
-                                {% if form.profile_name.errors %}
-                                    <div class="invalid-feedback d-block">{{ form.profile_name.errors|join:", " }}</div>
-                                {% endif %}
-                                <button type="button" class="btn btn-outline-primary mt-2" id="add-profile-btn">Add Profile</button>
-                                <div id="new-profile-form">
-                                    <input type="text" name="new_profile_name" id="new_profile_name" class="form-control" placeholder="Enter profile name">
-                                    <small class="form-text text-muted">Click 'Next' to save and use this profile.</small>
-                                </div>
-                            </div>
+                    <div class="form-section text-center">
+                        <h2 class="h4 mb-3">Profile Options</h2>
+                        <div class="mb-3">
+                            {{ form.profile_option.label_tag }}
+                            {{ form.profile_option }}
+                            {% if form.profile_option.errors %}
+                                <div class="invalid-feedback d-block">{{ form.profile_option.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div id="existing-profile-container">
+                            {{ form.existing_profile.label_tag }}
+                            {{ form.existing_profile }}
+                            {% if form.existing_profile.errors %}
+                                <div class="invalid-feedback d-block">{{ form.existing_profile.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div id="new-profile-container" style="display: none;">
+                            {{ form.new_profile_name.label_tag }}
+                            {{ form.new_profile_name }}
+                            {% if form.new_profile_name.errors %}
+                                <div class="invalid-feedback d-block">{{ form.new_profile_name.errors|join:", " }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">Enter a name for your new profile.</small>
                         </div>
                     </div>
                 {% elif step_name == 'experience' %}
@@ -99,14 +95,16 @@
                                                 <input type="checkbox" name="{{ subform.prefix }}-DELETE"
                                                        class="form-check-input"
                                                        id="{{ subform.prefix }}-delete">
-                                                <label class="form-check-label" for="{{ subform.prefix }}-delete">Delete this experience</label>
+                                                <label class="form-check-label" for="{{ subform.prefix }}-delete">Delete
+                                                    this experience</label>
                                             </div>
                                         {% endif %}
                                     </div>
                                 </div>
                             {% endfor %}
                         </div>
-                        <button type="button" class="btn btn-outline-primary mb-3" id="add-experience">Add Experience</button>
+                        <button type="button" class="btn btn-outline-primary mb-3" id="add-experience">Add Experience
+                        </button>
                         <div id="empty-experiences-form" class="hidden-form">
                             <div class="form-item">
                                 <div class="row">
@@ -146,7 +144,8 @@
                                                            class="form-label">{{ field.label }}</label>
                                                     {{ field }}
                                                     {% if field.errors %}
-                                                        конкурент <div class="invalid-feedback d-block">{{ field.errors|join:", " }}</div>
+                                                        конкурент
+                                                        <div class="invalid-feedback d-block">{{ field.errors|join:", " }}</div>
                                                     {% endif %}
                                                 </div>
                                             {% endif %}
@@ -156,7 +155,8 @@
                                                 <input type="checkbox" name="{{ subform.prefix }}-DELETE"
                                                        class="form-check-input"
                                                        id="{{ subform.prefix }}-delete">
-                                                <label class="form-check-label" for="{{ subform.prefix }}-delete">Delete this project</label>
+                                                <label class="form-check-label" for="{{ subform.prefix }}-delete">Delete
+                                                    this project</label>
                                             </div>
                                         {% endif %}
                                     </div>
@@ -206,14 +206,16 @@
                                                 <input type="checkbox" name="{{ subform.prefix }}-DELETE"
                                                        class="form-check-input"
                                                        id="{{ subform.prefix }}-delete">
-                                                <label class="form-check-label" for="{{ subform.prefix }}-delete">Delete this reference</label>
+                                                <label class="form-check-label" for="{{ subform.prefix }}-delete">Delete
+                                                    this reference</label>
                                             </div>
                                         {% endif %}
                                     </div>
                                 </div>
                             {% endfor %}
                         </div>
-                        <button type="button" class="btn btn-outline-primary mb-3" id="add-reference">Add Reference</button>
+                        <button type="button" class="btn btn-outline-primary mb-3" id="add-reference">Add Reference
+                        </button>
                         <div id="empty-references-form" class="hidden-form">
                             <div class="form-item">
                                 <div class="row">
@@ -260,15 +262,8 @@
 {% endblock %}
 
 {% block extra_js %}
-    <script src="{% static 'candidate/javascript/edit_user.js' %}"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const addProfileBtn = document.getElementById('add-profile-btn');
-            const newProfileForm = document.getElementById('new-profile-form');
-
-            addProfileBtn.addEventListener('click', () => {
-                newProfileForm.style.display = newProfileForm.style.display === 'none' ? 'block' : 'none';
-            });
-        });
+        window.currentStep = "{{ step_name }}"; // Pass the current step name to JS
     </script>
+    <script src="{% static 'candidate/javascript/edit_user.js' %}"></script>
 {% endblock %}
