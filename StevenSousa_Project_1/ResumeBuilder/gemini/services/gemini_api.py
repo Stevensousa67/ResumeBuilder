@@ -129,7 +129,7 @@ def generate_resume_content(profile, job):
     Please format this information into a professional resume tailored specifically for this job.
     Highlight the skills and experiences that are most relevant to the job description.
     The resume should be concise, well-organized, and ready for submission.
-    Use only the provided information listed in the prompt - don't add any.
+    Use only the provided information listed in the prompt - don't add any additional details.
     Omit skills and projects that don't support this job description.
     Return the resume in markdown format without any additional notes or extra cruft. I want just the resume.
     """

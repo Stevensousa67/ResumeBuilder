@@ -1,90 +1,92 @@
-import markdown2
+import re
+import markdown2  # Keep markdown2
 from io import BytesIO
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_LEFT, TA_CENTER
-from bs4 import BeautifulSoup
-
+from xhtml2pdf import pisa
 
 def convert_markdown_to_pdf(markdown_content):
-    # Convert Markdown to HTML
-    html_content = markdown2.markdown(markdown_content)
+    # Clean up Markdown code block markers (e.g., ```markdown or ```)
+    markdown_content = re.sub(r'```(markdown)?', '', markdown_content, flags=re.IGNORECASE)
+    markdown_content = re.sub(r"^```(?:markdown)?\n(.*?)\n?```", r"\1", markdown_content,
+                              flags=re.DOTALL | re.MULTILINE)
 
-    # Parse HTML to extract text elements
-    soup = BeautifulSoup(html_content, 'html.parser')
+    # Convert Markdown to HTML with markdown2
+    html = markdown2.markdown(markdown_content, extras=['tables', 'fenced-code-blocks'])
 
-    # Set up styles for the PDF
-    styles = getSampleStyleSheet()
-    styles.add(ParagraphStyle(
-        name='CustomNormal',
-        fontName='Helvetica',
-        fontSize=10,
-        leading=12,
-        alignment=TA_LEFT,
-        spaceAfter=6
-    ))
-    styles.add(ParagraphStyle(
-        name='CustomHeading1',
-        fontName='Helvetica-Bold',  # Use bold font
-        fontSize=16,
-        leading=20,
-        alignment=TA_LEFT,
-        spaceAfter=12
-    ))
-    styles.add(ParagraphStyle(
-        name='CustomHeading2',
-        fontName='Helvetica-Bold',  # Use bold font
-        fontSize=14,
-        leading=18,
-        alignment=TA_LEFT,
-        spaceAfter=10
-    ))
-    styles.add(ParagraphStyle(
-        name='CustomListItem',
-        fontName='Helvetica',
-        fontSize=10,
-        leading=12,
-        leftIndent=15,
-        bulletIndent=5,
-        alignment=TA_LEFT,
-        spaceAfter=4
-    ))
+    # Add custom CSS for better styling
+    css = """
+    <style>
+        body {
+            font-family: 'Helvetica', sans-serif;
+            font-size: 12pt;
+            line-height: 1.5;
+            margin: 20px;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: bold;
+            margin-top: 2px;
+            margin-bottom: 2px;
+        }
+        h1 {
+            font-size: 18pt;
+        }
+        h2 {
+            font-size: 16pt;
+        }
+        p {
+            margin-bottom: 2px;
+        }
+        ul, ol {
+            margin-left: 20px;
+            margin-bottom: 2px;
+        }
+        li {
+            margin-bottom: 2px;
+        }
+        strong {
+            font-weight: bold;
+        }
+        a {
+            color: #1a3c6d;
+            text-decoration: underline;
+        }
+    </style>
+    """
 
-    # Create a buffer for the PDF
+    # Combine CSS and HTML
+    full_html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        {css}
+    </head>
+    <body>
+        {html}
+    </body>
+    </html>
+    """
+
+    # Create a BytesIO buffer for the PDF
     pdf_buffer = BytesIO()
-    doc = SimpleDocTemplate(pdf_buffer, pagesize=letter, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=72)
 
-    # Build the document elements
-    elements = []
-
-    # Process each HTML tag and map to ReportLab elements
-    for element in soup.children:
-        if element.name == 'h1':
-            elements.append(Paragraph(element.get_text(), styles['CustomHeading1']))
-            elements.append(Spacer(1, 12))
-        elif element.name == 'h2':
-            elements.append(Paragraph(element.get_text(), styles['CustomHeading2']))
-            elements.append(Spacer(1, 10))
-        elif element.name == 'p':
-            elements.append(Paragraph(element.get_text(), styles['CustomNormal']))
-            elements.append(Spacer(1, 6))
-        elif element.name == 'ul':
-            for li in element.find_all('li'):
-                text = f"• {li.get_text()}"
-                elements.append(Paragraph(text, styles['CustomListItem']))
-                elements.append(Spacer(1, 4))
-        elif element.name == 'ol':
-            for idx, li in enumerate(element.find_all('li'), 1):
-                text = f"{idx}. {li.get_text()}"
-                elements.append(Paragraph(text, styles['CustomListItem']))
-                elements.append(Spacer(1, 4))
-
-    # Build the PDF
-    doc.build(elements)
+    # Generate PDF
+    try:
+        pisa_status = pisa.CreatePDF(full_html, dest=pdf_buffer)
+        if pisa_status.err:
+            print(f'Error generating PDF: {pisa_status.err}')
+            raise Exception(f'Error generating PDF: {pisa_status.err}')
+        print("PDF generated successfully")
+    except Exception as e:
+        print(f'Error generating PDF: {e}')
+        raise
 
     # Get the PDF content
     pdf_content = pdf_buffer.getvalue()
     pdf_buffer.close()
+
+    # Debug: Save to a file for inspection
+    with open("debug_output.pdf", "wb") as f:
+        f.write(pdf_content)
+    print("Debug PDF saved as debug_output.pdf")
 
     return pdf_content
