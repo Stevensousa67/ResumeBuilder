@@ -67,12 +67,12 @@ class ProfileForm(forms.ModelForm):
 
 class ProfileSelectForm(forms.Form):
     profile_option = forms.ChoiceField(
-        choices=[('existing', 'Select Existing Profile'), ('new', 'Create New Profile')],
+        choices=[('existing', 'Edit Existing Profile'), ('new', 'Create New Profile')],
         widget=forms.RadioSelect,
         initial='existing'
     )
     existing_profile = forms.ModelChoiceField(
-        queryset=Profile.objects.none(),  # This is dynamically updated based on user
+        queryset=Profile.objects.none(),
         widget=forms.Select,
         required=False,
         empty_label="Choose an existing profile"
@@ -80,7 +80,7 @@ class ProfileSelectForm(forms.Form):
     new_profile_name = forms.CharField(
         max_length=100,
         required=False,
-        widget=forms.TextInput(attrs={'placeholder': 'Enter a new profile name'})
+        widget=forms.TextInput(attrs={'placeholder': 'Database Engineer'})
     )
 
     def __init__(self, *args, **kwargs):

@@ -1,6 +1,5 @@
 from django.conf import settings
-from candidate.models import Profile, Experience, Project, Reference
-from jobs.models import Job
+from candidate.models import Experience, Project, Reference
 from google import genai
 
 def extract_profile_data(profile):
@@ -129,7 +128,7 @@ def generate_resume_content(profile, job):
 
     Please format this information into a professional resume tailored specifically for this job.
     Highlight the skills and experiences that are most relevant to the job description.
-    The resume should be concise, well-organized, and easy for submission.
+    The resume should be concise, well-organized, and ready for submission.
     Use only the provided information listed in the prompt - don't add any.
     Omit skills and projects that don't support this job description.
     Return the resume in markdown format without any additional notes or extra cruft. I want just the resume.

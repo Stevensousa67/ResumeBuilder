@@ -19,8 +19,13 @@
 
         <div class="mb-3">
             {% if resume.pdf_file %}
-                <a href="{% url 'gemini:view_resume' pk=resume.pk %}?download=1" class="btn btn-success">Download
+                <a href="{% url 'gemini:view_resume' pk=resume.pk %}?download=1" class="btn btn-success me-2">Download
                     PDF</a>
+                <form method="post" style="display:inline;"
+                      onsubmit="return confirm('Are you sure you want to delete this resume? This action cannot be undone.');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Resume</button>
+                </form>
             {% else %}
                 <p class="text-muted">No PDF available</p>
             {% endif %}

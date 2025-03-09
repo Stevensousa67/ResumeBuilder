@@ -85,6 +85,11 @@ def view_resume(request, pk):
         else:
             messages.error(request, 'PDF file not found. Try generating the resume again.')
 
+    if request.method == 'POST':
+        resume.delete()
+        messages.success(request, 'Resume deleted successfully.')
+        return redirect('gemini:resume_list')
+
     return render(request, 'gemini/view_resume.html', {
         'resume': resume,
         'job': resume.job

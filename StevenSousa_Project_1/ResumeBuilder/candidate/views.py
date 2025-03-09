@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -40,6 +40,24 @@ def signup(request):
 def logout_view(request):
     logout(request)
     return redirect('jobs:index')
+
+# View profiles
+@login_required
+def view_profiles(request):
+    profiles = Profile.objects.filter(user=request.user)
+
+    if request.method == 'POST':
+        profile_id = request.POST.get('profile_id')
+        if profile_id:
+            profile = get_object_or_404(Profile, id=profile_id, user=request.user)  # Ensure user owns the profile
+            try:
+                profile.delete()
+                messages.success(request, "Profile deleted successfully.")
+            except Exception as e:
+                messages.error(request, f"Error deleting profile: {str(e)}")
+            return redirect('candidate:view_profiles')
+
+    return render(request, 'candidate/view_profiles.html', {'profiles': profiles})
 
 
 # Profile Create View (kept for standalone use if needed)
@@ -125,7 +143,6 @@ class EditUserWizard(SessionWizardView):
         try:
             if step == 'profile_select':
                 form = ProfileSelectForm(data=data, files=files, user=self.request.user, prefix=prefix)
-                print(f"ProfileSelectForm fields: {form.fields.keys()}")  # Debug
                 return form
             elif step in ['experience', 'projects', 'references']:
                 profile_data = self.get_cleaned_data_for_step('profile_select')
@@ -133,7 +150,7 @@ class EditUserWizard(SessionWizardView):
                     profile_option = profile_data.get('profile_option')
                     if profile_option == 'existing':
                         existing_profile = profile_data.get('existing_profile')
-                        profile_id = existing_profile.id if existing_profile else None  # Extract ID
+                        profile_id = existing_profile.id if existing_profile else None
                         if profile_id:
                             try:
                                 profile = Profile.objects.get(id=profile_id, user=self.request.user)
