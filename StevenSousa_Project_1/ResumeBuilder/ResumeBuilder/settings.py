@@ -145,6 +145,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'ResumeBuilder/media'
 
 # Authentication redirects
+LOGIN_URL = 'candidate:login'
 LOGIN_REDIRECT_URL = 'jobs:jobs_list'  # Fallback, overridden by CustomLoginView
 LOGOUT_REDIRECT_URL = 'jobs:jobs_list'
 
