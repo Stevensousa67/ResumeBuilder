@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Generate Resume{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h1 class="text-center">Generate Resume for {{ job.job_title }} at {{ job.company_name }}</h1>
+        {% if messages %}
+            <div class="alert alert-info">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if existing_resume %}
+            <div class="alert alert-warning">
+                <p>You already have a resume for this job (Version {{ existing_resume.version }}).</p>
+                <p>Generating a new one will create a new version.</p>
+                <a href="{% url 'gemini:view_resume' pk=existing_resume.pk %}">View Existing Resume</a>
+            </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <h3>Select a Profile</h3>
+                {{ form.profile }}
+                {% if form.profile.help_text %}
+                    <p class="text-muted">{{ form.profile.help_text }}</p>
+                {% endif %}
+            </div>
+            <button type="submit" class="btn btn-primary">Generate Resume</button>
+            <a href="{% url 'jobs:job_details' job_id=job.job_id %}" class="btn btn-primary">Cancel</a>
+        </form>
+    </div>
+{% endblock %}

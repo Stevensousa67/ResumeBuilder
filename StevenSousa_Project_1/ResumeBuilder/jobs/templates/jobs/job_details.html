@@ -21,6 +21,8 @@
             <p class="card-text"><strong>URL:</strong> <a href="{{ job.url }}" target="_blank"
                                                           rel="noopener noreferrer">{{ job.url }}</a></p>
 
+            <a class="btn btn-success" href="{% url 'gemini:generate_resume' job_id=job.job_id %}" >Craft Resume</a>
+
         </div>
         <div class="card-footer text-end">
             <a class="btn btn-primary" href="{% url 'jobs:jobs_list' %}">Back to Jobs</a>
