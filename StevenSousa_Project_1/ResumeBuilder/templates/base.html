@@ -24,6 +24,8 @@
                        href="{% url 'candidate:view_profiles' %}">Profiles</a>
                     <a class="nav-link {% if request.path == '/gemini/resume_list/' %}active{% endif %}"
                        href="{% url 'gemini:resume_list' %}">Resumes</a>
+                    <a class="nav-link {% if request.path == '/gemini/cover_letter_list/' %}active{% endif %}"
+                       href="{% url 'gemini:cover_letter_list' %}">Cover Letters</a>
                     <a class="nav-link {% if request.path == '/candidate/edit_user/' %}active{% endif %}"
                        href="{% url 'candidate:edit_user' %}">Edit User</a>
                     <form class="nav-link" method="post" action="{% url 'candidate:logout' %}" style="display:inline;">

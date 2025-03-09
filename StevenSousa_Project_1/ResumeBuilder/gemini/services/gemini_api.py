@@ -2,10 +2,10 @@ from django.conf import settings
 from candidate.models import Experience, Project, Reference
 from google import genai
 
-def extract_profile_data(profile):
-    """Extract all relevant data from a profile into a structured dictionary"""
-    user = profile.user
 
+def extract_profile_data(profile):
+    # Reused as-is (unchanged)
+    user = profile.user
     profile_data = {
         'name': f"{user.first_name} {user.last_name}",
         'email': user.email,
@@ -20,8 +20,6 @@ def extract_profile_data(profile):
         },
         'profile_name': profile.profile_name,
     }
-
-    # Get experience data
     experiences = []
     for exp in Experience.objects.filter(profile=profile).order_by('-start_date'):
         experiences.append({
@@ -32,8 +30,6 @@ def extract_profile_data(profile):
             'description': exp.description,
         })
     profile_data['experiences'] = experiences
-
-    # Get project data
     projects = []
     for proj in Project.objects.filter(profile=profile):
         projects.append({
@@ -41,8 +37,6 @@ def extract_profile_data(profile):
             'description': proj.description,
         })
     profile_data['projects'] = projects
-
-    # Get reference data
     references = []
     for ref in Reference.objects.filter(profile=profile):
         references.append({
@@ -52,16 +46,29 @@ def extract_profile_data(profile):
             'relationship': ref.relationship if ref.relationship else '',
         })
     profile_data['references'] = references
-
     return profile_data
 
 
-def generate_resume_content(profile, job):
-    """Generate resume using Gemini API based on profile and job data"""
+def generate_content(profile, job, content_type):
+    """
+    Generate either a resume or a cover letter using Gemini API based on the content_type.
+
+    Args:
+        profile: The user's Profile instance.
+        job: The Job instance for which the content is being generated.
+        content_type: String, either "resume" or "cover_letter".
+
+    Returns:
+        str: The generated Markdown content.
+    """
+    if content_type not in ["resume", "cover_letter"]:
+        raise ValueError("content_type must be 'resume' or 'cover_letter'")
+
     profile_data = extract_profile_data(profile)
 
+    # Common prompt header
     prompt = f"""
-    Please create a professional resume for a candidate applying for the following job:
+    Please create a professional {content_type} for a candidate applying for the following job:
 
     Job Title: {job.job_title}
     Company: {job.company_name}
@@ -124,29 +131,36 @@ def generate_resume_content(profile, job):
             Relationship: {ref['relationship']}
             """
 
+    # Tailor the prompt based on content_type
     prompt += f"""
-
-    Please format this information into a professional resume tailored specifically for this job.
+    Please format this information into a professional {content_type} tailored specifically for this job.
     Highlight the skills and experiences that are most relevant to the job description.
-    The resume should be concise, well-organized, and ready for submission.
+    The {content_type} should be concise, well-organized{' and include a formal salutation and closing' if content_type == 'cover_letter' else ''}.
     Use only the provided information listed in the prompt - don't add any additional details.
     Omit skills and projects that don't support this job description.
-    Return the resume in markdown format without any additional notes or extra cruft. I want just the resume.
+    Return the {content_type} in markdown format without any additional notes or extra cruft. I want just the {content_type}.
     """
 
-    return submit_prompt(prompt)
+    # Get the raw Markdown content
+    markdown_content = submit_prompt(prompt)
+
+    # Strip code block markers if present
+    if markdown_content.startswith("```markdown\n"):
+        markdown_content = markdown_content[len("```markdown\n"):]
+    if markdown_content.endswith("```"):
+        markdown_content = markdown_content[:-3]
+
+    return markdown_content.strip()
 
 
 def submit_prompt(prompt):
-    """Submit a prompt to the Gemini API and return the generated resume content"""
+    # Existing prompt submission function (unchanged)
     try:
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
         response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
-        print(f"Response: {response}")  # Debug: Print the full response
         if response and hasattr(response, 'text'):
             return response.text
         else:
             raise ValueError("Invalid response from Gemini API: No text content found")
     except Exception as e:
-        print(f"Exception in submit_prompt: {e}")  # Debug: Print the exception
         raise Exception(f"Failed to generate content with Gemini API: {str(e)}")

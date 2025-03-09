@@ -3,6 +3,7 @@ import markdown2  # Keep markdown2
 from io import BytesIO
 from xhtml2pdf import pisa
 
+
 def convert_markdown_to_pdf(markdown_content):
     # Clean up Markdown code block markers (e.g., ```markdown or ```)
     markdown_content = re.sub(r'```(markdown)?', '', markdown_content, flags=re.IGNORECASE)
@@ -83,10 +84,5 @@ def convert_markdown_to_pdf(markdown_content):
     # Get the PDF content
     pdf_content = pdf_buffer.getvalue()
     pdf_buffer.close()
-
-    # Debug: Save to a file for inspection
-    with open("debug_output.pdf", "wb") as f:
-        f.write(pdf_content)
-    print("Debug PDF saved as debug_output.pdf")
 
     return pdf_content

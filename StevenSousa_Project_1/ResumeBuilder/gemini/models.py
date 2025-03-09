@@ -47,4 +47,4 @@ class GeneratedCoverLetter(GeneratedDocument):
         return f"Cover Letter for {self.profile.profile_name} - {self.job.title} (v{self.version})"
 
     def get_absolute_url(self):
-        return reverse('gemini:coverletter_detail', kwargs={'pk': self.pk})
+        return reverse('gemini:cover_letter_detail', kwargs={'pk': self.pk})
