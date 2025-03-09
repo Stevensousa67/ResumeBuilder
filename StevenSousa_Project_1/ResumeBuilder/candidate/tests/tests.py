@@ -1,7 +1,6 @@
 from django.test import TransactionTestCase
 from django.urls import reverse
-from django.contrib.auth.models import User
-from candidate.models import Candidate, Experience, Project, Reference
+from candidate.models import User, Profile, Experience, Project, Reference
 from bs4 import BeautifulSoup
 import datetime as date
 import sys
@@ -19,22 +18,17 @@ class TestCandidateDatabase(TransactionTestCase):
         self.user = User.objects.create_user(
             username=unique_email,
             email=unique_email,
-            password='Password123!'
-        )
-        # Create a valid Candidate object
-        self.candidate = Candidate.objects.create(
-            user=self.user,
-            email=self.user.email,
-            first_name="Initial",
-            last_name="User",
-            phone="1234567890"
+            password='Password123!',
+            first_name='Test',
+            last_name='User',
+            phone='1234567890'
         )
 
     def tearDown(self):
         print(self.stdout.getvalue())
         sys.stdout = sys.__stdout__
         self.user.delete()
-        Candidate.objects.all().delete()
+        Profile.objects.all().delete()
         Experience.objects.all().delete()
         Project.objects.all().delete()
         Reference.objects.all().delete()
@@ -53,19 +47,20 @@ class TestCandidateDatabase(TransactionTestCase):
 
         self.assertEqual(response.status_code, 302, 'User was redirected')
         self.assertTrue(User.objects.filter(email=data['email']).exists(), 'User was created')
-        self.assertTrue(Candidate.objects.filter(email=data['email']).exists(), 'Candidate was created')
 
-        candidate = Candidate.objects.get(email=data['email'])
-        self.assertEqual(candidate.email, data['email'], 'Candidate email matches')
-        self.assertEqual(candidate.first_name, '', 'Candidate first name is empty')
-        self.assertEqual(candidate.last_name, '', 'Candidate last name is empty')
-        self.assertEqual(candidate.phone, '', 'Candidate phone is empty')
-        self.assertIsNone(candidate.website, 'Candidate website is empty')
-        self.assertIsNone(candidate.skills, 'Candidate skills is empty')
-        self.assertIsNone(candidate.address, 'Candidate address is empty')
-        self.assertIsNone(candidate.education, 'Candidate education is empty')
-        self.assertIsNone(candidate.major, 'Candidate major is empty')
-        self.assertIsNone(candidate.courses, 'Candidate courses is empty')
+        # Verify that no profile is created at signup
+        user = User.objects.get(email=data['email'])
+        self.assertFalse(Profile.objects.filter(user=user).exists(), 'Profile was not created')
+        self.assertEqual(user.email, data['email'], 'User email matches')
+        self.assertEqual(user.first_name, '', 'User first name is empty')
+        self.assertEqual(user.last_name, '', 'User last name is empty')
+        self.assertEqual(user.phone, '', 'User phone is empty')
+        self.assertIsNone(user.website, 'User website is empty')
+        self.assertIsNone(user.skills, 'User skills is empty')
+        self.assertIsNone(user.address, 'User address is empty')
+        self.assertIsNone(user.education, 'User education is empty')
+        self.assertIsNone(user.major, 'User major is empty')
+        self.assertIsNone(user.courses, 'User courses is empty')
 
     def test_02_candidate_update(self):
         client = self.client
@@ -79,32 +74,44 @@ class TestCandidateDatabase(TransactionTestCase):
         response = client.get(url)
         self.assertEqual(response.status_code, 200, "Wizard page should load successfully")
 
-        # Extract the CSRF token and hash or hidden fields from the GET response using BeautifulSoup
+        # Extract the CSRF token
         soup = BeautifulSoup(response.content.decode('utf-8'), 'html.parser')
         csrf_input = soup.find('input', {'name': 'csrfmiddlewaretoken'})
         csrf_value = csrf_input['value'] if csrf_input else ''
 
-        # Step 1 - Update candidate profile
-        candidate_data = {
-            'candidate-first_name': 'Test',
-            'candidate-last_name': 'User',
-            'candidate-email': self.user.email.lower(),
-            'candidate-phone': '5555555555',
-            'candidate-website': 'https://www.example.com',
-            'candidate-address': '1234 Elm St, Springfield, IL 62701',
-            'candidate-education': 'BA',
-            'candidate-major': 'Computer Science',
-            'candidate-skills': 'Python, Django, JavaScript',
-            'candidate-courses': 'Data Structures, Algorithms, Web Development',
-            'edit_user_wizard-current_step': 'candidate',
+        # Step 1 - Update user profile
+        user_data = {
+            'user-first_name': 'Test',
+            'user-last_name': 'User',
+            'user-email': self.user.email.lower(),
+            'user-phone': '5555555555',
+            'user-website': 'https://www.example.com',
+            'user-address': '1234 Elm St, Springfield, IL 62701',
+            'user-education': 'BS',  # Fixed: changed from 'BA' to match model choices
+            'user-major': 'Computer Science',
+            'user-skills': 'Python, Django, JavaScript',
+            'user-courses': 'Data Structures, Algorithms, Web Development',
+            'edit_user_wizard-current_step': 'user',
             'csrfmiddlewaretoken': csrf_value,
         }
-        response = client.post(url, candidate_data)
+        response = client.post(url, user_data)
+        self.assertEqual(response.status_code, 200, "Should redirect to next step")
+        self.assertContains(response, '<h2 class="h4 mb-3">Profile Options</h2>', html=True,
+                            msg_prefix="Next step should be Profile Options")
+
+        # Step 2 - Select "new" profile option and create a new profile
+        profile_data = {
+            'profile_select-profile_option': 'new',  # Selects the radio button for new profile
+            'profile_select-new_profile_name': 'Software Developer',  # Enters new profile name
+            'edit_user_wizard-current_step': 'profile_select',
+            'csrfmiddlewaretoken': csrf_value,
+        }
+        response = client.post(url, profile_data)
         self.assertEqual(response.status_code, 200, "Should redirect to next step")
         self.assertContains(response, '<h2 class="h4 mb-3">Experience</h2>', html=True,
                             msg_prefix="Next step should be Experience")
 
-        # Step 2 - Update candidate experiences
+        # Step 3 - Update candidate experiences
         experience_data = {
             'experiences-0-title': 'Software Developer',
             'experiences-0-company': 'Example Corp',
@@ -122,9 +129,9 @@ class TestCandidateDatabase(TransactionTestCase):
         response = client.post(url, experience_data)
         self.assertEqual(response.status_code, 200, "Should redirect to next step")
         self.assertContains(response, '<h2 class="h4 mb-3">Projects</h2>', html=True,
-                            msg_prefix="Next step should be Experience")
+                            msg_prefix="Next step should be Projects")
 
-        # Step 3 - Update candidate projects
+        # Step 4 - Update candidate projects
         project_data = {
             'projects-0-title': 'Project A',
             'projects-0-description': 'Developed a web application for tracking inventory',
@@ -139,9 +146,9 @@ class TestCandidateDatabase(TransactionTestCase):
         response = client.post(url, project_data)
         self.assertEqual(response.status_code, 200, "Should redirect to next step")
         self.assertContains(response, '<h2 class="h4 mb-3">References</h2>', html=True,
-                            msg_prefix="Next step should be Experience")
+                            msg_prefix="Next step should be References")
 
-        # Step 4 - Update candidate references
+        # Step 5 - Update candidate references
         reference_data = {
             'references-0-first_name': 'Jane',
             'references-0-last_name': 'Smith',
@@ -159,20 +166,25 @@ class TestCandidateDatabase(TransactionTestCase):
         response = client.post(url, reference_data)
         self.assertEqual(response.status_code, 302, "Should redirect to jobs_list after completing wizard")
 
-        # Verify the candidate record has updated data
-        candidate = Candidate.objects.get(user=self.user)
-        self.assertEqual(candidate.first_name, candidate_data['candidate-first_name'], 'Candidate first name matches')
-        self.assertEqual(candidate.last_name, candidate_data['candidate-last_name'], 'Candidate last name matches')
-        self.assertEqual(candidate.phone, candidate_data['candidate-phone'], 'Candidate phone matches')
-        self.assertEqual(candidate.website, candidate_data['candidate-website'], 'Candidate website matches')
-        self.assertEqual(candidate.skills, candidate_data['candidate-skills'], 'Candidate skills matches')
-        self.assertEqual(candidate.address, candidate_data['candidate-address'], 'Candidate location matches')
-        self.assertEqual(candidate.education, candidate_data['candidate-education'], 'Candidate education matches')
-        self.assertEqual(candidate.major, candidate_data['candidate-major'], 'Candidate major matches')
-        self.assertEqual(candidate.courses, candidate_data['candidate-courses'], 'Candidate courses matches')
+        # Verify the user record has updated data
+        user = User.objects.get(id=self.user.id)
+        self.assertEqual(user.first_name, user_data['user-first_name'], 'User first name matches')
+        self.assertEqual(user.last_name, user_data['user-last_name'], 'User last name matches')
+        self.assertEqual(user.phone, user_data['user-phone'], 'User phone matches')
+        self.assertEqual(user.website, user_data['user-website'], 'User website matches')
+        self.assertEqual(user.skills, user_data['user-skills'], 'User skills matches')
+        self.assertEqual(user.address, user_data['user-address'], 'User location matches')
+        self.assertEqual(user.education, user_data['user-education'], 'User education matches')
+        self.assertEqual(user.major, user_data['user-major'], 'User major matches')
+        self.assertEqual(user.courses, user_data['user-courses'], 'User courses matches')
+
+        # Verify the profile was created
+        self.assertEqual(Profile.objects.filter(user=user).count(), 1, 'One profile should exist')
+        profile = Profile.objects.get(user=user)
+        self.assertEqual(profile.profile_name, profile_data['profile_select-new_profile_name'], 'Profile name matches')
 
         # Verify the experiences record has updated data
-        experiences = Experience.objects.filter(candidate=candidate)
+        experiences = Experience.objects.filter(profile=profile)  # Fixed: changed 'candidate' to 'profile'
         self.assertEqual(len(experiences), 1)
         experience = experiences[0]
         self.assertEqual(experience.title, experience_data['experiences-0-title'], 'Experience title matches')
@@ -183,19 +195,20 @@ class TestCandidateDatabase(TransactionTestCase):
                          'Experience description matches')
 
         # Verify the projects record has updated data
-        projects = Project.objects.filter(candidate=candidate)
+        projects = Project.objects.filter(profile=profile)  # Fixed: changed 'candidate' to 'profile'
         self.assertEqual(len(projects), 1)
         project = projects[0]
         self.assertEqual(project.title, project_data['projects-0-title'], 'Project title matches')
         self.assertEqual(project.description, project_data['projects-0-description'], 'Project description matches')
 
         # Verify the references record has updated data
-        references = Reference.objects.filter(candidate=candidate)
+        references = Reference.objects.filter(profile=profile)  # Fixed: changed 'candidate' to 'profile'
         self.assertEqual(len(references), 1)
         reference = references[0]
         self.assertEqual(reference.first_name, reference_data['references-0-first_name'],
                          'Reference first name matches')
-        self.assertEqual(reference.last_name, reference_data['references-0-last_name'], 'Reference last name matches')
+        self.assertEqual(reference.last_name, reference_data['references-0-last_name'],
+                         'Reference last name matches')
         self.assertEqual(reference.phone, reference_data['references-0-phone'], 'Reference phone matches')
         self.assertEqual(reference.email, reference_data['references-0-email'], 'Reference email matches')
         self.assertEqual(reference.relationship, reference_data['references-0-relationship'],

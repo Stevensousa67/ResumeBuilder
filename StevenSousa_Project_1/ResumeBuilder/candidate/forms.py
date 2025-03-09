@@ -1,6 +1,5 @@
 from django import forms
-from django.contrib.auth.models import User
-from .models import Candidate, Reference, Project, Experience
+from .models import User, Profile, Reference, Project, Experience
 
 
 # Sign Up Form
@@ -26,10 +25,10 @@ class SignupForm(forms.Form):
         return cleaned_data
 
 
-# Candidate Form
-class CandidateForm(forms.ModelForm):
+# User Form
+class UserForm(forms.ModelForm):
     class Meta:
-        model = Candidate
+        model = User
         fields = ['first_name', 'last_name', 'email', 'phone', 'website', 'address', 'education', 'major',
                   'skills', 'courses']
         widgets = {
@@ -56,6 +55,54 @@ class CandidateForm(forms.ModelForm):
         return email.lower()
 
 
+# Profile Form
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['profile_name']
+        widgets = {
+            'profile_name': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+
+class ProfileSelectForm(forms.Form):
+    profile_option = forms.ChoiceField(
+        choices=[('existing', 'Edit Existing Profile'), ('new', 'Create New Profile')],
+        widget=forms.RadioSelect,
+        initial='existing'
+    )
+    existing_profile = forms.ModelChoiceField(
+        queryset=Profile.objects.none(),
+        widget=forms.Select,
+        required=False,
+        empty_label="Choose an existing profile"
+    )
+    new_profile_name = forms.CharField(
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'Database Engineer'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['existing_profile'].queryset = Profile.objects.filter(user=user)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        profile_option = cleaned_data.get('profile_option')
+        existing_profile = cleaned_data.get('existing_profile')
+        new_profile_name = cleaned_data.get('new_profile_name')
+
+        if profile_option == 'existing' and not existing_profile:
+            raise forms.ValidationError("You must select an existing profile.")
+        elif profile_option == 'new' and not new_profile_name:
+            raise forms.ValidationError("You must enter a new profile name.")
+
+        return cleaned_data
+
+
 # Reference Form
 class ReferenceForm(forms.ModelForm):
     class Meta:
@@ -68,6 +115,12 @@ class ReferenceForm(forms.ModelForm):
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'relationship': forms.TextInput(attrs={'class': 'form-control'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)  # Pass current user from view
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['profile'].queryset = Profile.objects.filter(user=user)  # Limit to user's profiles
 
     def clean_phone(self):
         phone = self.cleaned_data['phone']
@@ -90,6 +143,12 @@ class ProjectForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['profile'].queryset = Profile.objects.filter(user=user)
+
 
 # Experience Form
 class ExperienceForm(forms.ModelForm):
@@ -110,6 +169,12 @@ class ExperienceForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['profile'].queryset = Profile.objects.filter(user=user)
+
     def clean(self):
         cleaned_data = super().clean()
         start_date = cleaned_data.get('start_date')
@@ -127,7 +192,7 @@ class ExperienceForm(forms.ModelForm):
 
 # Formsets
 ExperienceFormSet = forms.inlineformset_factory(
-    Candidate,
+    Profile,
     Experience,
     form=ExperienceForm,
     fields=['title', 'company', 'start_date', 'end_date', 'description', 'present'],
@@ -135,7 +200,7 @@ ExperienceFormSet = forms.inlineformset_factory(
     can_delete=True
 )
 ProjectFormSet = forms.inlineformset_factory(
-    Candidate,
+    Profile,
     Project,
     form=ProjectForm,
     fields=['title', 'description'],
@@ -143,7 +208,7 @@ ProjectFormSet = forms.inlineformset_factory(
     can_delete=True
 )
 ReferenceFormSet = forms.inlineformset_factory(
-    Candidate,
+    Profile,
     Reference,
     form=ReferenceForm,
     fields=['first_name', 'last_name', 'phone', 'email', 'relationship'],

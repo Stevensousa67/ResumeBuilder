@@ -25,11 +25,13 @@ env_path = os.path.join(BASE_DIR, '.env')
 if os.path.exists(env_path):
     env_config = AutoConfig(search_path=BASE_DIR)
 
+GEMINI_API_KEY = config('GEMINI_API_KEY')
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-wz#f--69#v9$on3j!i%47qjs5!a&1l4%g7z+#15^!ob-!c6@7-'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -47,8 +49,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'jobs',
     'candidate',
+    'gemini',
     'formtools',
 ]
+
+# Custom User Model
+AUTH_USER_MODEL = 'candidate.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -134,7 +140,12 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / "ResumeBuilder/staticfiles"
 
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'ResumeBuilder/media'
+
 # Authentication redirects
+LOGIN_URL = 'candidate:login'
 LOGIN_REDIRECT_URL = 'jobs:jobs_list'  # Fallback, overridden by CustomLoginView
 LOGOUT_REDIRECT_URL = 'jobs:jobs_list'
 

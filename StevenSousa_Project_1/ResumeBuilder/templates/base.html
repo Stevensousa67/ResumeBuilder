@@ -20,26 +20,32 @@
                 <a class="nav-link {% if request.path == '/jobs/' %}active{% endif %}"
                    href="{% url 'jobs:jobs_list' %}">Jobs</a>
                 {% if user.is_authenticated %}
-                <a class="nav-link {% if request.path == '/candidate/edit_user/' %}active{% endif %}"
-                   href="{% url 'candidate:edit_user' %}">Edit User</a>
-                <form class="nav-link" method="post" action="{% url 'candidate:logout' %}" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="nav-link btn btn-link"
-                            style="padding:0; border:none; background:none;">Log Out
-                    </button>
-                </form>
+                    <a class="nav-link {% if request.path == '/candidate/view_profiles/' %}active{% endif %}"
+                       href="{% url 'candidate:view_profiles' %}">Profiles</a>
+                    <a class="nav-link {% if request.path == '/gemini/resume_list/' %}active{% endif %}"
+                       href="{% url 'gemini:resume_list' %}">Resumes</a>
+                    <a class="nav-link {% if request.path == '/gemini/cover_letter_list/' %}active{% endif %}"
+                       href="{% url 'gemini:cover_letter_list' %}">Cover Letters</a>
+                    <a class="nav-link {% if request.path == '/candidate/edit_user/' %}active{% endif %}"
+                       href="{% url 'candidate:edit_user' %}">Edit User</a>
+                    <form class="nav-link" method="post" action="{% url 'candidate:logout' %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-link btn btn-link"
+                                style="padding:0; border:none; background:none;">Log Out
+                        </button>
+                    </form>
                 {% else %}
-                <a class="nav-link {% if request.path == '/candidate/login/' %}active{% endif %}"
-                   href="{% url 'candidate:login' %}">Log In</a>
-                <a class="nav-link {% if request.path == '/candidate/signup/' %}active{% endif %}"
-                   href="{% url 'candidate:signup' %}">Sign Up</a>
+                    <a class="nav-link {% if request.path == '/candidate/login/' %}active{% endif %}"
+                       href="{% url 'candidate:login' %}">Log In</a>
+                    <a class="nav-link {% if request.path == '/candidate/signup/' %}active{% endif %}"
+                       href="{% url 'candidate:signup' %}">Sign Up</a>
                 {% endif %}
             </nav>
         </div>
     </header>
     <main class="">
         {% block content %}
-        <!-- Content goes here -->
+            <!-- Content goes here -->
         {% endblock %}
     </main>
     <footer class="mt-auto text-white-50">

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Generate Cover Letter{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h1 class="text-center">Generate Cover Letter for {{ job.job_title }} at {{ job.company_name }}</h1>
+        {% if messages %}
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endif %}
+        {% if existing_cover_letter %}
+            <div class="alert alert-warning">
+                <p>You already have a cover letter for this job (Version {{ existing_cover_letter.version }}).</p>
+                <p>Generating a new one will create a new version.</p>
+                <a href="{% url 'gemini:cover_letter_detail' pk=existing_cover_letter.pk %}">View Existing Cover
+                    Letter</a>
+            </div>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <h3>Select a Profile</h3>
+                {{ form.profile }}
+                {% if form.profile.help_text %}
+                    <p class="text-muted">{{ form.profile.help_text }}</p>
+                {% endif %}
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Generate Cover Letter</button>
+            <a href="{% url 'jobs:job_details' job_id=job.job_id %}" class="btn btn-danger mt-3">Cancel</a>
+        </form>
+    </div>
+{% endblock %}
