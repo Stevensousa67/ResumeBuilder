@@ -150,7 +150,7 @@ class TestGeminiApp(TransactionTestCase):
     {exp['description']}
     """
 
-        prompt += f"""
+        prompt += """
     PROJECTS:
     """
         if not profile_data['projects']:
@@ -162,7 +162,7 @@ class TestGeminiApp(TransactionTestCase):
     {proj['description']}
     """
 
-        prompt += f"""
+        prompt += """
     REFERENCES:
     """
         if not profile_data['references']:
@@ -177,13 +177,15 @@ class TestGeminiApp(TransactionTestCase):
     """
 
         prompt += f"""
-    Please format this information into a professional {content_type} tailored specifically for this job.
-    Highlight the skills and experiences that are most relevant to the job description.
-    The {content_type} should be concise, well-organized{' and include a formal salutation and closing' if content_type == 'cover_letter' else ''}.
-    Use only the provided information listed in the prompt - don't add any additional details.
-    Omit skills and projects that don't support this job description.
-    Return the {content_type} in markdown format without any additional notes or extra cruft. I want just the {content_type}.
-    """
+                Please format this information into a professional {content_type} tailored specifically for this job.
+                Highlight the skills and experiences that are most relevant to the job description.
+                The {content_type} should be concise, well-organized\
+                {' and include a formal salutation and closing' if content_type == 'cover_letter' else ''}.
+                Use only the provided information listed in the prompt - don't add any additional details.
+                Omit skills and projects that don't support this job description.
+                Return the {content_type} in markdown format without any additional notes or extra cruft.
+                I want just the {content_type}.
+                """
 
         # Assert that the prompt contains job description and user information
         self.assertIn(job.job_description, prompt, "Prompt should contain job description")

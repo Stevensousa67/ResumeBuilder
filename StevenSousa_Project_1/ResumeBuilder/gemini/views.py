@@ -32,7 +32,8 @@ def generate_resume(request, job_id):
                 pdf_content = convert_markdown_to_pdf(markdown_content)
                 resume = GeneratedResume(user=request.user, job=job, profile=profile, version=next_version,
                                          content=markdown_content)
-                filename = f"{request.user.first_name} {request.user.last_name} Resume - {profile.profile_name} - v{next_version}.pdf"
+                filename = (f"{request.user.first_name} {request.user.last_name} Resume - {profile.profile_name} - "
+                            f"v{next_version}.pdf")
                 resume.pdf_file.save(filename, ContentFile(pdf_content))
                 resume.save()
                 messages.success(request, 'Resume successfully generated')
@@ -93,7 +94,9 @@ def generate_cover_letter(request, job_id):
                 pdf_content = convert_markdown_to_pdf(markdown_content)
                 cover_letter = GeneratedCoverLetter(user=request.user, job=job, profile=profile, version=next_version,
                                                     content=markdown_content)
-                filename = f"{request.user.first_name} {request.user.last_name} Cover Letter - {profile.profile_name} - v{next_version}.pdf"
+                filename = (
+                    f"{request.user.first_name} {request.user.last_name} Cover Letter - {profile.profile_name} -"
+                    f" v{next_version}.pdf")
                 cover_letter.pdf_file.save(filename, ContentFile(pdf_content))
                 cover_letter.save()
                 messages.success(request, 'Cover letter successfully generated')

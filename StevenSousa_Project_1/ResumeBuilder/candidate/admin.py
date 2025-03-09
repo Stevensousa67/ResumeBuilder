@@ -40,14 +40,17 @@ class ProfileAdmin(admin.ModelAdmin):
 
     def experience_count(self, obj):
         return obj.experiences.count()
+
     experience_count.short_description = 'Experiences'
 
     def project_count(self, obj):
         return obj.projects.count()
+
     project_count.short_description = 'Projects'
 
     def reference_count(self, obj):
         return obj.references.count()
+
     reference_count.short_description = 'References'
 
 

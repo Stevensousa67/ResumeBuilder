@@ -105,21 +105,21 @@ def generate_content(profile, job, content_type):
             {exp['description']}
             """
 
-    prompt += f"""
-    PROJECTS:
-    """
+    prompt += """
+        PROJECTS:
+        """
     if not profile_data['projects']:
         prompt += "No projects available"
     else:
         for proj in profile_data['projects']:
             prompt += f"""
-            {proj['title']}
-            {proj['description']}
-            """
+                {proj['title']}
+                {proj['description']}
+                """
 
-    prompt += f"""
-    REFERENCES:
-    """
+    prompt += """
+        REFERENCES:
+        """
     if not profile_data['references']:
         prompt += "No references available"
     else:
@@ -133,13 +133,15 @@ def generate_content(profile, job, content_type):
 
     # Tailor the prompt based on content_type
     prompt += f"""
-    Please format this information into a professional {content_type} tailored specifically for this job.
-    Highlight the skills and experiences that are most relevant to the job description.
-    The {content_type} should be concise, well-organized{' and include a formal salutation and closing' if content_type == 'cover_letter' else ''}.
-    Use only the provided information listed in the prompt - don't add any additional details.
-    Omit skills and projects that don't support this job description.
-    Return the {content_type} in markdown format without any additional notes or extra cruft. I want just the {content_type}.
-    """
+        Please format this information into a professional {content_type} tailored specifically for this job.
+        Highlight the skills and experiences that are most relevant to the job description.
+        The {content_type} should be concise, well-organized\
+        {' and include a formal salutation and closing' if content_type == 'cover_letter' else ''}.
+        Use only the provided information listed in the prompt - don't add any additional details.
+        Omit skills and projects that don't support this job description.
+        Return the {content_type} in markdown format without any additional notes or extra cruft.
+        I want just the {content_type}.
+        """
 
     # Get the raw Markdown content
     markdown_content = submit_prompt(prompt)

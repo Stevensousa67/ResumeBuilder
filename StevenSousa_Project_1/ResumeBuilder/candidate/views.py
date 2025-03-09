@@ -41,6 +41,7 @@ def logout_view(request):
     logout(request)
     return redirect('jobs:index')
 
+
 # View profiles
 @login_required
 def view_profiles(request):

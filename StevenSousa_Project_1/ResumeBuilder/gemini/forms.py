@@ -1,6 +1,7 @@
 from django import forms
 from candidate.models import Profile
 
+
 class ProfileSelectionForm(forms.Form):
     profile = forms.ModelChoiceField(
         queryset=None,
