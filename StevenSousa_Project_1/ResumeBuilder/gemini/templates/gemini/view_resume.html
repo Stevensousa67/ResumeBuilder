@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}View Resume{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h1 class="text-center">Resume for {{ job.job_title }} at {{ job.company_name }}</h1>
+        {% if messages %}
+            <div class="alert alert-info">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <p><strong>Profile:</strong> {{ resume.profile.profile_name }}</p>
+        <p><strong>Version:</strong> {{ resume.version }}</p>
+        <p><strong>Created:</strong> {{ resume.created_date }}</p>
+
+        <div class="mb-3">
+            {% if resume.pdf_file %}
+                <a href="{% url 'gemini:view_resume' pk=resume.pk %}?download=1" class="btn btn-success">Download
+                    PDF</a>
+            {% else %}
+                <p class="text-muted">No PDF available</p>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <h3>Resume Content</h3>
+                <pre>{{ resume.content }}</pre>
+            </div>
+        </div>
+        <a href="{% url 'gemini:resume_list' %}" class="btn btn-primary mt-3">Back to Resume List</a>
+    </div>
+{% endblock %}
