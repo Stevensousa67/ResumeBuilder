@@ -137,33 +137,45 @@ class EditUserWizard(SessionWizardView):
             kwargs['instance'] = profile
         return formset_class(**kwargs)
 
+    def _get_profile_for_step(self):
+        """Retrieve the profile based on profile_select step data."""
+        profile_data = self.get_cleaned_data_for_step('profile_select')
+        if profile_data:
+            profile_option = profile_data.get('profile_option')
+            if profile_option == 'existing' and profile_data.get('existing_profile'):
+                try:
+                    return Profile.objects.get(
+                        id=profile_data['existing_profile'].id,  # Ensure we get the ID
+                        user=self.request.user
+                    )
+                except Profile.DoesNotExist:
+                    print(
+                        f"Profile with id {profile_data['existing_profile'].id} not found for user {self.request.user}")
+                    return None
+            elif profile_option == 'new' and profile_data.get('new_profile_name'):
+                profile, _ = Profile.objects.get_or_create(
+                    user=self.request.user,
+                    profile_name=profile_data['new_profile_name'].strip()
+                )
+                return profile
+        return None
+
+    def _handle_formset_step(self, step, data, files):
+        """Handle formset creation for experience, projects, and references steps."""
+        profile = self._get_profile_for_step()
+        return self._get_formset(step, data, files, profile)
+
     def get_form(self, step=None, data=None, files=None):
+        """Get the form for the current step with reduced complexity."""
         step = step or self.steps.current
         prefix = self.get_form_prefix(step)
         print(f"Step: {step}, Prefix: {prefix}")  # Debug
+
         try:
             if step == 'profile_select':
-                form = ProfileSelectForm(data=data, files=files, user=self.request.user, prefix=prefix)
-                return form
+                return ProfileSelectForm(data=data, files=files, user=self.request.user, prefix=prefix)
             elif step in ['experience', 'projects', 'references']:
-                profile_data = self.get_cleaned_data_for_step('profile_select')
-                if profile_data:
-                    profile_option = profile_data.get('profile_option')
-                    if profile_option == 'existing':
-                        existing_profile = profile_data.get('existing_profile')
-                        profile_id = existing_profile.id if existing_profile else None
-                        if profile_id:
-                            try:
-                                profile = Profile.objects.get(id=profile_id, user=self.request.user)
-                                return self._get_formset(step, data, files, profile)
-                            except Profile.DoesNotExist:
-                                print(f"Profile with id {profile_id} not found for user {self.request.user}")
-                                return self._get_formset(step, data, files)  # Fallback to empty formset
-                        else:
-                            return self._get_formset(step, data, files)  # Fallback if no ID
-                    elif profile_option == 'new':
-                        return self._get_formset(step, data, files, profile=None)  # Explicitly pass None
-                return self._get_formset(step, data, files, profile=None)
+                return self._handle_formset_step(step, data, files)
             return super().get_form(step, data, files)
         except Exception as e:
             print(f"Error in get_form for step {step}: {str(e)}")
@@ -181,7 +193,7 @@ class EditUserWizard(SessionWizardView):
                         user=self.request.user,
                         profile_name=new_profile_name
                     )
-                    form.cleaned_data['existing_profile'] = profile.id
+                    # Store the ID in storage, leave cleaned_data as is
                     self.storage.set_step_data(self.steps.current, {
                         'profile_select-existing_profile': str(profile.id),
                         'profile_select-profile_option': 'new',
@@ -196,9 +208,8 @@ class EditUserWizard(SessionWizardView):
     def get_form_kwargs(self, step):
         kwargs = super().get_form_kwargs(step)
         if step in ['experience', 'projects', 'references']:
-            profile_data = self.get_cleaned_data_for_step('profile_select')
-            if profile_data and profile_data.get('existing_profile'):
-                profile = Profile.objects.get(id=profile_data['existing_profile'], user=self.request.user)
+            profile = self._get_profile_for_step()
+            if profile:
                 if step == 'experience':
                     kwargs['queryset'] = Experience.objects.filter(profile=profile)
                 elif step == 'projects':
@@ -224,10 +235,11 @@ class EditUserWizard(SessionWizardView):
         profile_option = profile_data.get('profile_option')
 
         if profile_option == 'existing':
-            profile = profile_data.get('existing_profile')
+            profile = profile_data.get('existing_profile')  # This is a Profile object
+            if not profile:
+                raise ValueError("No existing profile selected.")
         else:  # profile_option == 'new'
             profile_name = profile_data.get('new_profile_name')
-            # Check if profile already exists before creating a new one
             profile, created = Profile.objects.get_or_create(
                 profile_name=profile_name,
                 user=self.request.user
