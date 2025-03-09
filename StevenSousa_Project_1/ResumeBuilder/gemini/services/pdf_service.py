@@ -1,5 +1,5 @@
 import re
-import markdown2  # Keep markdown2
+import markdown2
 from io import BytesIO
 from xhtml2pdf import pisa
 

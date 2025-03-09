@@ -21,7 +21,7 @@ class TestCandidateDatabase(TransactionTestCase):
             password='Password123!',
             first_name='Test',
             last_name='User',
-            phone='1234567890'  # Fixed: string instead of integer
+            phone='1234567890'
         )
 
     def tearDown(self):
