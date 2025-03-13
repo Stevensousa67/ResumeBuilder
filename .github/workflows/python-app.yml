@@ -78,9 +78,7 @@ jobs:
       - name: Run Django Management Commands
         working-directory: StevenSousa_Project_1/ResumeBuilder
         env:
-          TEST: "1"  # Trigger test database configuration
-          DB_HOST: ${{ secrets.DB_HOST_DEFAULT }}
-          DB_PORT: ${{ secrets.DB_PORT_DEFAULT }}
+          TESTING: "True"
         run: |
           python manage.py create_db
           python manage.py migrate
@@ -89,7 +87,5 @@ jobs:
       - name: Run Django Tests
         working-directory: StevenSousa_Project_1/ResumeBuilder
         env:
-          TEST: "1"  # Trigger test database configuration
-          DATABASE_URL: postgresql://${{ secrets.DB_USER_DEFAULT }}:${{ secrets.DB_PASSWORD_DEFAULT }}@localhost:5432/${{ secrets.DB_NAME_DEFAULT }}
         run: |
           python manage.py test jobs.tests candidate.tests gemini.tests --noinput --parallel 4 --verbosity 2

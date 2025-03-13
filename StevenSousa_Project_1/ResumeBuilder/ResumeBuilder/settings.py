@@ -109,8 +109,7 @@ DATABASES = {
     }
 }
 
-# Test database (overridable for CI)
-if 'TEST' in os.environ:
+if TESTING:
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': config('DB_NAME_DEFAULT'),
