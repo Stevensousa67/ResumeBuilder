@@ -93,42 +93,42 @@ WSGI_APPLICATION = 'ResumeBuilder.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('SUPABASE_DB_NAME'),
-        'USER': config('SUPABASE_USER'),
-        'PASSWORD': config('SUPABASE_PASSWORD'),
-        'HOST': config('SUPABASE_HOST'),
-        'PORT': config('SUPABASE_PORT'),
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
-        # 'NAME': config('DB_NAME'),
-        # 'USER': config('DB_USER_DEFAULT'),
-        # 'PASSWORD': config('DB_PASSWORD_DEFAULT'),
-        # 'HOST': config('DB_HOST_DEFAULT'),
-        # 'PORT': config('DB_PORT_DEFAULT'),
+        # 'NAME': config('SUPABASE_DB_NAME'),
+        # 'USER': config('SUPABASE_USER'),
+        # 'PASSWORD': config('SUPABASE_PASSWORD'),
+        # 'HOST': config('SUPABASE_HOST'),
+        # 'PORT': config('SUPABASE_PORT'),
+        # 'OPTIONS': {
+        #     'sslmode': 'require',
+        # },
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER_DEFAULT'),
+        'PASSWORD': config('DB_PASSWORD_DEFAULT'),
+        'HOST': config('DB_HOST_DEFAULT'),
+        'PORT': config('DB_PORT_DEFAULT'),
     }
 }
 
 # Render-specific settings
 ALLOWED_HOSTS = ['*']
-DEBUG = config('DEBUG', default=False, cast=bool)  # False in production
+DEBUG = config('DEBUG', default=True, cast=bool)  # False in production
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+{
+    'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+},
+{
+    'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+},
+{
+    'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+},
+{
+    'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+},
 ]
 
 # Internationalization
@@ -147,9 +147,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
-    BASE_DIR / "ResumeBuilder/static",
-    BASE_DIR / "ResumeBuilder/candidate/static",
-    BASE_DIR / "ResumeBuilder/jobs/static",
+BASE_DIR / "ResumeBuilder/static",
+BASE_DIR / "ResumeBuilder/candidate/static",
+BASE_DIR / "ResumeBuilder/jobs/static",
 ]
 STATIC_ROOT = BASE_DIR / "ResumeBuilder/staticfiles"
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
