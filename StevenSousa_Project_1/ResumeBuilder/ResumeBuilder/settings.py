@@ -117,18 +117,18 @@ DEBUG = config('DEBUG', default=True, cast=bool)  # False in production
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-{
-    'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-},
-{
-    'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-},
-{
-    'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-},
-{
-    'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-},
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
 ]
 
 # Internationalization
@@ -147,9 +147,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
-BASE_DIR / "ResumeBuilder/static",
-BASE_DIR / "ResumeBuilder/candidate/static",
-BASE_DIR / "ResumeBuilder/jobs/static",
+    BASE_DIR / "ResumeBuilder/static",
+    BASE_DIR / "ResumeBuilder/candidate/static",
+    BASE_DIR / "ResumeBuilder/jobs/static",
 ]
 STATIC_ROOT = BASE_DIR / "ResumeBuilder/staticfiles"
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
