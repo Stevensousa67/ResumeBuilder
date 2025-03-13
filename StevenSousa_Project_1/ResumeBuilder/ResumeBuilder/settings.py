@@ -109,6 +109,17 @@ DATABASES = {
     }
 }
 
+# Test database (overridable for CI)
+if 'TEST' in os.environ:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('DB_NAME_DEFAULT'),
+        'USER': config('DB_USER_DEFAULT'),
+        'PASSWORD': config('DB_PASSWORD_DEFAULT'),
+        'HOST': config('DB_HOST_DEFAULT', default='localhost'),
+        'PORT': config('DB_PORT_DEFAULT', default='5432'),
+    }
+
 # Render-specific settings
 ALLOWED_HOSTS = ['*']
 DEBUG = config('DEBUG', default=True, cast=bool)  # False in production
