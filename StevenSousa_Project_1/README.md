@@ -37,7 +37,7 @@
 - Start the .venv by running the command "source .venv/bin/activate"
 - Optional: upgrade pip by running the command "pip install --upgrade pip"
 - Install the dependencies by running the command "pip install -r requirements.txt"
-- In Sprint 3, the database and user were created, but with sprint 4, a new app was added: gemini, therefore, cd into ResumeBuilder/ and run the following command: "python manage.py migrate gemini --fake zero" and then "python manage.py migrate".
+- In Sprint 3, the database and user were created, but with sprint 4, a new app was added: gemini, therefore, cd into ResumeBuilder/ and run the following command: "python manage.py makemigrations" and then "python manage.py migrate".
 - Alternatively, you can drop the "ssousa_project1" database and run the command "python manage.py create_db" to create the database and user again, and then "python manage.py migrate" to create the tables. (This is what I did on my second computer when I went to test the project from scratch)
 - Start the Django server by running the command "python manage.py runserver"
 - Open your browser and navigate to "http://localhost:8000" to view the web application
@@ -47,7 +47,7 @@
 - To access the admin page, navigate to "http://localhost:8000/admin" and login with the superuser credentials (Highly recommended if you want a "birds-eye" view of the database)
 
 # How to Run Tests
-- With your .venv activated and in the directory StevenSousa_Proejct_1/ResumeBuilder/, run the command "python manage.py test jobs.tests candidate.tests genmini.tests"
+- With your .venv activated and in the directory StevenSousa_Project_1/ResumeBuilder/, run the command "python manage.py test jobs.tests candidate.tests genmini.tests"
 - A total of 11 tests will run. 5 tests for the jobs app (sprint 2 & 3), 2 tests for the candidate app (sprint 3), and 4 from the gemini app (sprint 4).
 
 # How to Create a User and Profile

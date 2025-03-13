@@ -58,6 +58,7 @@ AUTH_USER_MODEL = 'candidate.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -108,17 +109,8 @@ DATABASES = {
     }
 }
 
-db_config = {
-    'NAME': config('SUPABASE_DB_NAME'),
-    'USER': config('SUPABASE_USER'),
-    'PASSWORD': '[REDACTED]',
-    'HOST': config('SUPABASE_HOST'),
-    'PORT': config('SUPABASE_PORT'),
-}
-print("DEBUG: Database Config:", db_config)
-
 # Render-specific settings
-ALLOWED_HOSTS = ['*']  # Update later with your Render domain
+ALLOWED_HOSTS = ['https://resume-builder-t6fw.onrender.com', 'localhost', '127.0.0.1']
 DEBUG = config('DEBUG', default=False, cast=bool)  # False in production
 
 # Password validation
@@ -160,6 +152,7 @@ STATICFILES_DIRS = [
     BASE_DIR / "ResumeBuilder/jobs/static",
 ]
 STATIC_ROOT = BASE_DIR / "ResumeBuilder/staticfiles"
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
