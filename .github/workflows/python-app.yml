@@ -87,4 +87,4 @@ jobs:
       - name: Run Django Tests
         working-directory: StevenSousa_Project_1/ResumeBuilder
         run: |
-          python manage.py test jobs.tests candidate.tests gemini.tests --noinput --parallel 4 --verbosity 2
+          python manage.py test jobs.tests candidate.tests gemini.tests
