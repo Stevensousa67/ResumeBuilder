@@ -110,7 +110,7 @@ DATABASES = {
 }
 
 # Render-specific settings
-ALLOWED_HOSTS = ['https://resume-builder-t6fw.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
 DEBUG = config('DEBUG', default=False, cast=bool)  # False in production
 
 # Password validation
