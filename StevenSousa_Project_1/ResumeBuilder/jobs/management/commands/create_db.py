@@ -33,11 +33,11 @@ class Command(BaseCommand):
         # Attempt to connect to the Supabase database
         try:
             with psycopg.connect(
-                dbname=db_name,
-                user=db_user,
-                password=db_password,
-                host=db_host,
-                port=db_port
+                    dbname=db_name,
+                    user=db_user,
+                    password=db_password,
+                    host=db_host,
+                    port=db_port
             ) as conn:
                 with conn.cursor() as cursor:
                     cursor.execute("SELECT 1;")

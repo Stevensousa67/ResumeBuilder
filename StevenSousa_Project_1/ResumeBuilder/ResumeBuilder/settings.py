@@ -108,6 +108,15 @@ DATABASES = {
     }
 }
 
+db_config = {
+    'NAME': config('SUPABASE_DB_NAME'),
+    'USER': config('SUPABASE_USER'),
+    'PASSWORD': '[REDACTED]',
+    'HOST': config('SUPABASE_HOST'),
+    'PORT': config('SUPABASE_PORT'),
+}
+print("DEBUG: Database Config:", db_config)
+
 # Render-specific settings
 ALLOWED_HOSTS = ['*']  # Update later with your Render domain
 DEBUG = config('DEBUG', default=False, cast=bool)  # False in production
