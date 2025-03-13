@@ -22,6 +22,13 @@ jobs:
       # Gemini API Key
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
+      # Supabase database credentials
+      SUPABASE_HOST: ${{ secrets.SUPABASE_HOST }}
+      SUPABASE_PORT: ${{ secrets.SUPABASE_PORT }}
+      SUPABASE_DB_NAME: ${{ secrets.SUPABASE_DB_NAME }}
+      SUPABASE_USER: ${{ secrets.SUPABASE_USER }}
+      SUPABASE_PASSWORD: ${{ secrets.SUPABASE_PASSWORD }}
+
       # Default database credentials
       DB_NAME_DEFAULT: ${{ secrets.DB_NAME_DEFAULT }}
       DB_USER_DEFAULT: ${{ secrets.DB_USER_DEFAULT }}
