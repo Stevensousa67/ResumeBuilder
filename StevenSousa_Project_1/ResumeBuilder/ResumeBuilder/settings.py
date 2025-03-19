@@ -26,14 +26,8 @@ if os.path.exists(env_path):
     env_config = AutoConfig(search_path=BASE_DIR)
 
 GEMINI_API_KEY = config('GEMINI_API_KEY')
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
@@ -99,13 +93,23 @@ DATABASES = {
         'HOST': config('SUPABASE_HOST'),
         'PORT': config('SUPABASE_PORT'),
         'OPTIONS': {
-            'sslmode': 'require',
+            'sslmode': 'verify-full',
         },
+
+        # Localhost connection
         # 'NAME': config('DB_NAME', default='postgres'),
         # 'USER': config('DB_USER', default='postgres'),
         # 'PASSWORD': config('DB_PASSWORD', default='postgres'),
         # 'HOST': config('DB_HOST_DEFAULT', default='localhost'),
         # 'PORT': config('DB_PORT_DEFAULT', default='5432'),
+
+        # GCP connection
+        # 'NAME': config('GCP_DB_NAME', default='postgres'),
+        # 'USER': config('GCP_USER', default='postgres'),
+        # 'PASSWORD': config('GCP_PASSWORD', default='postgres'),
+        # 'HOST': config('GCP_HOST', default='localhost'),
+        # 'PORT': config('GCP_PORT', default='5432'),
+
     }
 }
 
@@ -164,9 +168,19 @@ STATICFILES_DIRS = [
 STATIC_ROOT = BASE_DIR / "ResumeBuilder/staticfiles"
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Media files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'ResumeBuilder/media'
+# Supabase Storage settings
+AWS_ACCESS_KEY_ID = config('SUPABASE_API_KEY')
+AWS_SECRET_ACCESS_KEY = config('SUPABASE_SERVICE_KEY')
+AWS_STORAGE_BUCKET_NAME = 'media'
+AWS_S3_ENDPOINT_URL = config('SUPABASE_URL') + '/storage/v1/s3' 
+AWS_S3_REGION_NAME = 'auto'
+AWS_S3_FILE_OVERWRITE = False
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+MEDIA_URL = f'{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/'
+
+# # Media files
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = BASE_DIR / 'ResumeBuilder/media'
 
 # Authentication redirects
 LOGIN_URL = 'candidate:login'

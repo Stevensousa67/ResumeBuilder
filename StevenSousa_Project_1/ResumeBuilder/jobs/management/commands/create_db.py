@@ -45,18 +45,25 @@ class Command(BaseCommand):
         except psycopg.OperationalError as e:
             self.stdout.write(self.style.ERROR(f"Error connecting to Supabase database: {e}"))
 
-        # # Get local database credentials from .env
+        # Get local database credentials from .env
         # db_name = config('DB_NAME')
         # db_user = config('DB_USER')
         # db_password = config('DB_PASSWORD')
         # db_host = config('DB_HOST_DEFAULT')
         # db_port = config('DB_PORT_DEFAULT')
-        #
+
+        # # Get GCP database credentials from .env
+        # db_name = config('GCP_DB_NAME')
+        # db_user = config('GCP_USER')
+        # db_password = config('GCP_PASSWORD')
+        # db_host = config('GCP_HOST')
+        # db_port = config('GCP_PORT')
+        
         # # Get default PostgreSQL credentials from .env
         # db_name_default = config('DB_NAME_DEFAULT')
         # db_user_default = config('DB_USER_DEFAULT')
         # db_password_default = config('DB_PASSWORD_DEFAULT')
-        #
+        
         # # Connect to PostgreSQL server using default credentials
         # try:
         #     with psycopg.connect(
@@ -76,7 +83,7 @@ class Command(BaseCommand):
         #                 self.stdout.write(self.style.SUCCESS(f"Database '{db_name}' created successfully."))
         #             else:
         #                 self.stdout.write(self.style.SUCCESS(f"Database '{db_name}' already exists."))
-        #
+        
         #             # Check if custom user exists in server
         #             cursor.execute("""SELECT 1 FROM pg_roles WHERE rolname = %s;""", (db_user,))
         #             if not cursor.fetchone():
@@ -87,7 +94,7 @@ class Command(BaseCommand):
         #                 self.stdout.write(self.style.SUCCESS(f"User '{db_user}' already exists."))
         # except psycopg.OperationalError as e:
         #     self.stdout.write(self.style.ERROR(f"Error connecting to PostgreSQL server: {e}"))
-        #
+        
         #     # Connect using the new credentials
         # try:
         #     with psycopg.connect(
