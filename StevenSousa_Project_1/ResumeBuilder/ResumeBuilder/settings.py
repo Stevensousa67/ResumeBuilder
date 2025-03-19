@@ -93,7 +93,7 @@ DATABASES = {
         'HOST': config('SUPABASE_HOST'),
         'PORT': config('SUPABASE_PORT'),
         'OPTIONS': {
-            'sslmode': 'verify-full',
+            'sslmode': 'require',
         },
 
         # Localhost connection
