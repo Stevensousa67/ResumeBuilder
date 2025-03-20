@@ -168,19 +168,19 @@ STATICFILES_DIRS = [
 STATIC_ROOT = BASE_DIR / "ResumeBuilder/staticfiles"
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Supabase Storage settings
-AWS_ACCESS_KEY_ID = config('SUPABASE_API_KEY')
-AWS_SECRET_ACCESS_KEY = config('SUPABASE_SERVICE_KEY')
-AWS_STORAGE_BUCKET_NAME = 'media'
-AWS_S3_ENDPOINT_URL = config('SUPABASE_URL') + '/storage/v1/s3' 
-AWS_S3_REGION_NAME = 'auto'
-AWS_S3_FILE_OVERWRITE = False
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-MEDIA_URL = f'{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/'
+# # Supabase Storage settings
+# AWS_ACCESS_KEY_ID = config('SUPABASE_API_KEY')
+# AWS_SECRET_ACCESS_KEY = config('SUPABASE_SERVICE_KEY')
+# AWS_STORAGE_BUCKET_NAME = 'media'
+# AWS_S3_ENDPOINT_URL = config('SUPABASE_URL') + '/storage/v1/s3'
+# AWS_S3_REGION_NAME = 'auto'
+# AWS_S3_FILE_OVERWRITE = False
+# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# MEDIA_URL = f'{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/'
 
-# # Media files
-# MEDIA_URL = '/media/'
-# MEDIA_ROOT = BASE_DIR / 'ResumeBuilder/media'
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'ResumeBuilder/media'
 
 # Authentication redirects
 LOGIN_URL = 'candidate:login'
