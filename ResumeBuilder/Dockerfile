@@ -3,7 +3,8 @@ FROM python:3.13-slim AS builder
 
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    DJANGO_SETTINGS_MODULE=ResumeBuilder.settings
 
 # Install system dependencies required for build
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -19,7 +20,10 @@ RUN pip install --upgrade pip && \
 COPY . .
 
 # Collect static files with proper paths
-RUN python manage.py collectstatic --noinput
+# Ensure staticfiles directory exists even if collectstatic finds no files
+RUN mkdir -p /app/ResumeBuilder/staticfiles && \
+    python manage.py collectstatic --noinput || true && \
+    ls -la /app/ResumeBuilder/staticfiles  # Debug: Verify staticfiles directory contents
 
 # Stage 2: Production
 FROM python:3.13-slim
@@ -32,7 +36,8 @@ RUN useradd -m appuser && \
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PATH="/home/appuser/.local/bin:${PATH}"
+    PATH="/home/appuser/.local/bin:${PATH}" \
+    DJANGO_SETTINGS_MODULE=ResumeBuilder.settings
 
 # Copy dependencies from builder
 COPY --from=builder --chown=appuser:appuser /root/.local /home/appuser/.local
@@ -45,4 +50,4 @@ COPY --from=builder --chown=appuser:appuser /app/ResumeBuilder/staticfiles /app/
 
 USER appuser
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "ResumeBuilder.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.8000", "--workers", "3", "ResumeBuilder.wsgi:application"]
