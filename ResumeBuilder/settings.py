@@ -159,8 +159,7 @@ if TESTING:
 #         'PORT': config('DB_PORT_DEFAULT', default='5432'),
 #     }
 
-ALLOWED_HOSTS = [get_config_value(
-    'EC2_HOST'), 'resumebuilder.stevensousa.com', '127.0.0.1']
+ALLOWED_HOSTS = [get_config_value('EC2_IPV4'), 'resumebuilder.stevensousa.com', '127.0.0.1']
 DEBUG = get_config_value('DEBUG')
 
 # Password validation
