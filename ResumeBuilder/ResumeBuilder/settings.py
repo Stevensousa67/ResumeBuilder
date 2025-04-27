@@ -14,6 +14,7 @@ from pathlib import Path
 from decouple import config
 import os
 import sys
+from django.core.exceptions import ImproperlyConfigured
 
 # Auto-detect if running tests
 TESTING = 'test' in sys.argv
