@@ -50,4 +50,4 @@ COPY --from=builder --chown=appuser:appuser /app/ResumeBuilder/staticfiles /app/
 
 USER appuser
 
-CMD ["gunicorn", "--bind", "0.0.0.8000", "--workers", "3", "ResumeBuilder.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "ResumeBuilder.wsgi:application"]
