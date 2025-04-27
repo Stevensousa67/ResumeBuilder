@@ -31,6 +31,7 @@ def get_config_value(key, default=None):
             value = ssm.get_parameter(Name=param_path, WithDecryption=True)['Parameter']['Value']
             return value
         except Exception as e:
+            print(f"SSM Error for {param_path}: {str(e)}")  # Add better logging
             if default is not None:
                 return default
             raise RuntimeError(f"Could not fetch {param_path} from SSM: {e}")
