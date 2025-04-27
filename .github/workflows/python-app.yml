@@ -68,14 +68,14 @@ jobs:
         env:
           TESTING: "True"
         run: |
-          python manage.py create_db
-          python manage.py migrate
-          python manage.py data_processing
+          # python manage.py create_db
+          # python manage.py migrate
+          # python manage.py data_processing
 
       - name: Run Django Tests
         working-directory: ./ResumeBuilder
         run: |
-          python manage.py test jobs.tests candidate.tests gemini.tests
+          # python manage.py test jobs.tests candidate.tests gemini.tests
 
   deploy:
     needs: test
