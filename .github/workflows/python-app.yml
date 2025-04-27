@@ -91,8 +91,8 @@ jobs:
 
       - name: Build and push to ECR
         run: |
-          docker build --platform linux/amd64 -t ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest .
-          docker push ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest
+          docker build --platform linux/amd64 -t ${{ secrets.ECR_REGISTRY_URI }}:latest .
+          docker push ${{ secrets.ECR_REGISTRY_URI }}:latest
       
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1
@@ -102,9 +102,9 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
-            docker pull ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest
+            docker pull ${{ secrets.ECR_REGISTRY_URI }}:latest
             docker stop app || true
             docker run -d --name app -p 80:8000 \
               -e AWS_REGION=${{ secrets.AWS_REGION }} \
               -e DEBUG=${{ secrets.DEBUG }} \
-              ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest
+              ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
