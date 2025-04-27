@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-from decouple import config, AutoConfig
+from decouple import config
 import os
 import sys
 
@@ -21,6 +21,7 @@ TESTING = 'test' in sys.argv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+
 def get_config_value(key, default=None):
     # Use SSM Parameter Store in production (if AWS_REGION is set)
     if os.environ.get('AWS_REGION'):
@@ -28,7 +29,8 @@ def get_config_value(key, default=None):
         ssm = boto3.client('ssm', region_name=os.environ['AWS_REGION'])
         param_path = f"/resumebuilder/{key}"
         try:
-            value = ssm.get_parameter(Name=param_path, WithDecryption=True)['Parameter']['Value']
+            value = ssm.get_parameter(Name=param_path, WithDecryption=True)[
+                'Parameter']['Value']
             return value
         except Exception as e:
             if default is not None:
@@ -36,6 +38,7 @@ def get_config_value(key, default=None):
             raise RuntimeError(f"Could not fetch {param_path} from SSM: {e}")
     # Use .env locally
     return config(key, default=default)
+
 
 GEMINI_API_KEY = get_config_value('GEMINI_API_KEY')
 SECRET_KEY = get_config_value('SECRET_KEY')
