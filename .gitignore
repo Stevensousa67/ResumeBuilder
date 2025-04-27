@@ -470,7 +470,6 @@ $RECYCLE.BIN/
 *.lnk
 
 .venv/
-
-ResumeBuilder/ResumeBuilder_Key.pem
+ResumeBuilder_Key.pem
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,linux,jetbrains,visualstudiocode,python,django
