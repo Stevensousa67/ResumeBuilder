@@ -27,7 +27,7 @@ def get_config_value(key, default=None):
     if os.environ.get('AWS_REGION'):
         import boto3
         from botocore.exceptions import ClientError
-        
+
         ssm = boto3.client('ssm', region_name=os.environ['AWS_REGION'])
         try:
             response = ssm.get_parameter(
@@ -38,9 +38,9 @@ def get_config_value(key, default=None):
         except ClientError as e:
             if default is not None:
                 return default
-            raise ImproperlyConfigured(f"SSM error retrieving /resumebuilder/{key}: {e}")
+            raise ImproperlyConfigured(
+                f"SSM error retrieving /resumebuilder/{key}: {e}")
     return config(key, default=default)
-
 
 
 GEMINI_API_KEY = get_config_value('GEMINI_API_KEY')
