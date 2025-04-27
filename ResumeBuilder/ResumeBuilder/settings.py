@@ -157,7 +157,7 @@ if TESTING:
 #         'PORT': config('DB_PORT_DEFAULT', default='5432'),
 #     }
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [get_config_value('EC2_HOST'), 'resumebuilder.stevensousa.com']
 DEBUG = get_config_value('DEBUG')
 
 # Password validation
