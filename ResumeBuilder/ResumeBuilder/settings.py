@@ -14,7 +14,6 @@ from pathlib import Path
 from decouple import config
 import os
 import sys
-from django.core.exceptions import ImproperlyConfigured
 
 # Auto-detect if running tests
 TESTING = 'test' in sys.argv
@@ -26,20 +25,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 def get_config_value(key, default=None):
     if os.environ.get('AWS_REGION'):
         import boto3
-        from botocore.exceptions import ClientError
-
         ssm = boto3.client('ssm', region_name=os.environ['AWS_REGION'])
+        param_path = f"/resumebuilder/{key}"
         try:
-            response = ssm.get_parameter(
-                Name=f"/resumebuilder/{key}",
-                WithDecryption=True
-            )
-            return response['Parameter']['Value']
-        except ClientError as e:
+            value = ssm.get_parameter(Name=param_path, WithDecryption=True)['Parameter']['Value']
+            return value
+        except Exception as e:
             if default is not None:
                 return default
-            raise ImproperlyConfigured(
-                f"SSM error retrieving /resumebuilder/{key}: {e}")
+            raise RuntimeError(f"Could not fetch {param_path} from SSM: {e}")
     return config(key, default=default)
 
 
