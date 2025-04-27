@@ -2,9 +2,9 @@ name: Python application
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 permissions:
   contents: read
@@ -76,12 +76,13 @@ jobs:
         working-directory: ./ResumeBuilder
         run: |
           python manage.py test jobs.tests candidate.tests gemini.tests
-  
+
   deploy:
     needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -89,12 +90,19 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Login to ECR
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
+          docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
       - name: Build and push to ECR
         run: |
-          docker build --platform linux/amd64 -t ${{ secrets.ECR_REGISTRY_URI }}:latest . \
-          -f Dockerfile .
-          docker push ${{ secrets.ECR_REGISTRY_URI }}:latest
-      
+          docker build \
+            --platform linux/amd64 \
+            -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest \
+            -f Dockerfile .
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1
         with:
@@ -102,10 +110,8 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
-            docker pull ${{ secrets.ECR_REGISTRY_URI }}:latest
             docker stop app || true
+            docker rm app || true
             docker run -d --name app -p 80:8000 \
               -e AWS_REGION=${{ secrets.AWS_REGION }} \
-              -e DEBUG=${{ secrets.DEBUG }} \
               ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
