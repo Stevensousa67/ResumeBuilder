@@ -28,10 +28,12 @@ def get_config_value(key, default=None):
         ssm = boto3.client('ssm', region_name=os.environ['AWS_REGION'])
         param_path = f"/resumebuilder/{key}"
         try:
-            value = ssm.get_parameter(Name=param_path, WithDecryption=True)['Parameter']['Value']
+            value = ssm.get_parameter(Name=param_path, WithDecryption=True)[
+                'Parameter']['Value']
             return value
         except Exception as e:
-            print(f"SSM Error for {param_path}: {str(e)}")  # Add better logging
+            # Add better logging
+            print(f"SSM Error for {param_path}: {str(e)}")
             if default is not None:
                 return default
             raise RuntimeError(f"Could not fetch {param_path} from SSM: {e}")
@@ -157,7 +159,8 @@ if TESTING:
 #         'PORT': config('DB_PORT_DEFAULT', default='5432'),
 #     }
 
-ALLOWED_HOSTS = [get_config_value('EC2_HOST'),'resumebuilder.stevensousa.com','127.0.0.1']
+ALLOWED_HOSTS = [get_config_value(
+    'EC2_HOST'), 'resumebuilder.stevensousa.com', '127.0.0.1']
 DEBUG = get_config_value('DEBUG')
 
 # Password validation
