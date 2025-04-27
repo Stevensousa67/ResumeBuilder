@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    environment:
+      - AWS_REGION=us-east-2
+    volumes:
+      - static_volume:/app/ResumeBuilder/staticfiles
+      - media_volume:/app/ResumeBuilder/media
+    networks:
+      - app_network
+    expose:
+      - 8000
+
+  nginx:
+    image: nginx:1.25-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - static_volume:/app/ResumeBuilder/staticfiles
+      - media_volume:/app/ResumeBuilder/media
+      - ./nginx:/etc/nginx/conf.d
+    depends_on:
+      - web
+    networks:
+      - app_network
+
+volumes:
+  static_volume:
+  media_volume:
+
+networks:
+  app_network:
+    driver: bridge

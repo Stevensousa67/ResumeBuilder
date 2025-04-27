@@ -3,7 +3,6 @@ Django==5.2
 django-formtools==2.5.1
 django-storages==1.14.5
 supabase==2.13.0
-boto3==1.37.15
 python-decouple==3.8
 beautifulsoup4==4.13.3
 google-genai==1.5.0
@@ -11,3 +10,4 @@ xhtml2pdf==0.2.17
 markdown2==2.5.3
 gunicorn==23.0.0
 whitenoise==6.9.0
+boto3==1.38.3

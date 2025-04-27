@@ -21,16 +21,24 @@ TESTING = 'test' in sys.argv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-env_path = os.path.join(BASE_DIR, '.env')
-if os.path.exists(env_path):
-    env_config = AutoConfig(search_path=BASE_DIR)
+def get_config_value(key, default=None):
+    # Use SSM Parameter Store in production (if AWS_REGION is set)
+    if os.environ.get('AWS_REGION'):
+        import boto3
+        ssm = boto3.client('ssm', region_name=os.environ['AWS_REGION'])
+        param_path = f"/resumebuilder/{key}"
+        try:
+            value = ssm.get_parameter(Name=param_path, WithDecryption=True)['Parameter']['Value']
+            return value
+        except Exception as e:
+            if default is not None:
+                return default
+            raise RuntimeError(f"Could not fetch {param_path} from SSM: {e}")
+    # Use .env locally
+    return config(key, default=default)
 
-GEMINI_API_KEY = config('GEMINI_API_KEY')
-SECRET_KEY = config('SECRET_KEY')
-
-DEBUG = True
-
-ALLOWED_HOSTS = []
+GEMINI_API_KEY = get_config_value('GEMINI_API_KEY')
+SECRET_KEY = get_config_value('SECRET_KEY')
 
 # Application definition
 
@@ -87,45 +95,69 @@ WSGI_APPLICATION = 'ResumeBuilder.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('SUPABASE_DB_NAME'),
-        'USER': config('SUPABASE_USER'),
-        'PASSWORD': config('SUPABASE_PASSWORD'),
-        'HOST': config('SUPABASE_HOST'),
-        'PORT': config('SUPABASE_PORT'),
+        # Supabase connection
+        'NAME': get_config_value('SUPABASE_DB_NAME'),
+        'USER': get_config_value('SUPABASE_USER'),
+        'PASSWORD': get_config_value('SUPABASE_PASSWORD'),
+        'HOST': get_config_value('SUPABASE_HOST'),
+        'PORT': get_config_value('SUPABASE_PORT'),
         'OPTIONS': {
             'sslmode': 'require',
         },
 
         # Localhost connection
-        # 'NAME': config('DB_NAME', default='postgres'),
-        # 'USER': config('DB_USER', default='postgres'),
-        # 'PASSWORD': config('DB_PASSWORD', default='postgres'),
-        # 'HOST': config('DB_HOST_DEFAULT', default='localhost'),
-        # 'PORT': config('DB_PORT_DEFAULT', default='5432'),
-
-        # GCP connection
-        # 'NAME': config('GCP_DB_NAME', default='postgres'),
-        # 'USER': config('GCP_USER', default='postgres'),
-        # 'PASSWORD': config('GCP_PASSWORD', default='postgres'),
-        # 'HOST': config('GCP_HOST', default='localhost'),
-        # 'PORT': config('GCP_PORT', default='5432'),
-
+        # 'NAME': get_config_values('DB_NAME', default='postgres'),
+        # 'USER': get_config_values('DB_USER', default='postgres'),
+        # 'PASSWORD': get_config_values('DB_PASSWORD', default='postgres'),
+        # 'HOST': get_config_values('DB_HOST_DEFAULT', default='localhost'),
+        # 'PORT': get_config_values('DB_PORT_DEFAULT', default='5432'),
     }
 }
 
 if TESTING:
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME_DEFAULT'),
-        'USER': config('DB_USER_DEFAULT'),
-        'PASSWORD': config('DB_PASSWORD_DEFAULT'),
-        'HOST': config('DB_HOST_DEFAULT', default='localhost'),
-        'PORT': config('DB_PORT_DEFAULT', default='5432'),
+        'NAME': get_config_value('DB_NAME_DEFAULT'),
+        'USER': get_config_value('DB_USER_DEFAULT'),
+        'PASSWORD': get_config_value('DB_PASSWORD_DEFAULT'),
+        'HOST': get_config_value('DB_HOST_DEFAULT', default='localhost'),
+        'PORT': get_config_value('DB_PORT_DEFAULT', default='5432'),
     }
 
-# Render-specific settings
-ALLOWED_HOSTS = ['*']
-DEBUG = config('DEBUG', default=True, cast=bool)  # False in production
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         # Supabase connection
+#         'NAME': config('SUPABASE_DB_NAME'),
+#         'USER': config('SUPABASE_USER'),
+#         'PASSWORD': config('SUPABASE_PASSWORD'),
+#         'HOST': config('SUPABASE_HOST'),
+#         'PORT': config('SUPABASE_PORT'),
+#         'OPTIONS': {
+#             'sslmode': 'require',
+#         },
+
+#         # Localhost connection
+#         # 'NAME': config('DB_NAME', default='postgres'),
+#         # 'USER': config('DB_USER', default='postgres'),
+#         # 'PASSWORD': config('DB_PASSWORD', default='postgres'),
+#         # 'HOST': config('DB_HOST_DEFAULT', default='localhost'),
+#         # 'PORT': config('DB_PORT_DEFAULT', default='5432'),
+#     }
+# }
+
+# if TESTING:
+#     DATABASES['default'] = {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': config('DB_NAME_DEFAULT'),
+#         'USER': config('DB_USER_DEFAULT'),
+#         'PASSWORD': config('DB_PASSWORD_DEFAULT'),
+#         'HOST': config('DB_HOST_DEFAULT', default='localhost'),
+#         'PORT': config('DB_PORT_DEFAULT', default='5432'),
+#     }
+
+ALLOWED_HOSTS = []
+DEBUG = get_config_value('DEBUG')
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -167,16 +199,6 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / "ResumeBuilder/staticfiles"
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-# # Supabase Storage settings
-# AWS_ACCESS_KEY_ID = config('SUPABASE_API_KEY')
-# AWS_SECRET_ACCESS_KEY = config('SUPABASE_SERVICE_KEY')
-# AWS_STORAGE_BUCKET_NAME = 'media'
-# AWS_S3_ENDPOINT_URL = config('SUPABASE_URL') + '/storage/v1/s3'
-# AWS_S3_REGION_NAME = 'auto'
-# AWS_S3_FILE_OVERWRITE = False
-# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-# MEDIA_URL = f'{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/'
 
 # Media files
 MEDIA_URL = '/media/'
