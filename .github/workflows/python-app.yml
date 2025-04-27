@@ -100,7 +100,7 @@ jobs:
           docker build \
             --platform linux/amd64 \
             -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest \
-            -f app/Dockerfile app/
+            -f ResumeBuilder/Dockerfile ResumeBuilder/
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
 
       - name: Deploy to EC2
