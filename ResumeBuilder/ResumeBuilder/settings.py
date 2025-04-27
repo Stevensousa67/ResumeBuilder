@@ -23,21 +23,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 def get_config_value(key, default=None):
-    # Use SSM Parameter Store in production (if AWS_REGION is set)
     if os.environ.get('AWS_REGION'):
         import boto3
+        from botocore.exceptions import ClientError
+        
         ssm = boto3.client('ssm', region_name=os.environ['AWS_REGION'])
-        param_path = f"/resumebuilder/{key}"
         try:
-            value = ssm.get_parameter(Name=param_path, WithDecryption=True)[
-                'Parameter']['Value']
-            return value
-        except Exception as e:
+            response = ssm.get_parameter(
+                Name=f"/resumebuilder/{key}",
+                WithDecryption=True
+            )
+            return response['Parameter']['Value']
+        except ClientError as e:
             if default is not None:
                 return default
-            raise RuntimeError(f"Could not fetch {param_path} from SSM: {e}")
-    # Use .env locally
+            raise ImproperlyConfigured(f"SSM error retrieving /resumebuilder/{key}: {e}")
     return config(key, default=default)
+
 
 
 GEMINI_API_KEY = get_config_value('GEMINI_API_KEY')
