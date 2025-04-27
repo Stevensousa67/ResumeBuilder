@@ -11,7 +11,7 @@ RUN pip install --upgrade pip && \
 
 COPY . .
 
-RUN python manage.py collectstatic --noinput && 
+RUN python manage.py collectstatic --noinput 
 
 # Stage 2: Production
 FROM python:3.13-slim
