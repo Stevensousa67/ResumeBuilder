@@ -9,6 +9,10 @@ COPY requirements.txt .
 RUN pip install --upgrade pip && \
     pip install --user -r requirements.txt
 
+COPY . .
+
+RUN python manage.py collectstatic --noinput && 
+
 # Stage 2: Production
 FROM python:3.13-slim
 
@@ -23,6 +27,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 COPY --from=builder --chown=appuser:appuser /root/.local /home/appuser/.local
 COPY --chown=appuser:appuser . .
+COPY --chown=appuser:appuser --from=builder /app/ResumeBuilder/staticfiles /app/ResumeBuilder/staticfiles
 
 USER appuser
 
