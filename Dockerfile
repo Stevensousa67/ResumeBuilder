@@ -4,7 +4,8 @@ FROM python:3.13-slim AS builder
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    DJANGO_SETTINGS_MODULE=ResumeBuilder.settings
+    DJANGO_SETTINGS_MODULE=ResumeBuilder.settings \
+    STATIC_ROOT=/app/staticfiles
 
 # Install system dependencies required for build
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -20,24 +21,24 @@ RUN pip install --upgrade pip && \
 COPY . .
 
 # Collect static files with proper paths
-# Ensure staticfiles directory exists even if collectstatic finds no files
-RUN mkdir -p /app/ResumeBuilder/staticfiles && \
-    python manage.py collectstatic --noinput || true && \
-    ls -la /app/ResumeBuilder/staticfiles  # Debug: Verify staticfiles directory contents
+RUN mkdir -p /app/staticfiles && \
+    python manage.py collectstatic --noinput && \
+    ls -la /app/staticfiles  # Debug: Verify staticfiles contents
 
 # Stage 2: Production
 FROM python:3.13-slim
 
 # Create app user and directories with proper permissions
 RUN useradd -m appuser && \
-    mkdir -p /app/ResumeBuilder/staticfiles && \
+    mkdir -p /app/staticfiles && \
     chown -R appuser:appuser /app
 
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH="/home/appuser/.local/bin:${PATH}" \
-    DJANGO_SETTINGS_MODULE=ResumeBuilder.settings
+    DJANGO_SETTINGS_MODULE=ResumeBuilder.settings \
+    STATIC_ROOT=/app/staticfiles
 
 # Copy dependencies from builder
 COPY --from=builder --chown=appuser:appuser /root/.local /home/appuser/.local
@@ -46,7 +47,8 @@ COPY --from=builder --chown=appuser:appuser /root/.local /home/appuser/.local
 COPY --chown=appuser:appuser . .
 
 # Copy collected static files
-COPY --from=builder --chown=appuser:appuser /app/ResumeBuilder/staticfiles /app/ResumeBuilder/staticfiles
+COPY --from=builder --chown=appuser:appuser /app/staticfiles /app/staticfiles
+RUN ls -la /app/staticfiles  # Debug: Verify copied files
 
 USER appuser
 

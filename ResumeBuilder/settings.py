@@ -19,7 +19,7 @@ import sys
 TESTING = 'test' in sys.argv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def get_config_value(key, default=None):
@@ -75,7 +75,7 @@ ROOT_URLCONF = 'ResumeBuilder.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'ResumeBuilder/templates'],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -157,7 +157,7 @@ if TESTING:
 #         'PORT': config('DB_PORT_DEFAULT', default='5432'),
 #     }
 
-ALLOWED_HOSTS = [get_config_value('EC2_HOST'), 'resumebuilder.stevensousa.com']
+ALLOWED_HOSTS = [get_config_value('EC2_HOST'),'resumebuilder.stevensousa.com','127.0.0.1']
 DEBUG = get_config_value('DEBUG')
 
 # Password validation
@@ -194,16 +194,17 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
-    BASE_DIR / "ResumeBuilder/static",
-    BASE_DIR / "ResumeBuilder/candidate/static",
-    BASE_DIR / "ResumeBuilder/jobs/static",
+    BASE_DIR / "static",
+    BASE_DIR / "candidate/static",
+    BASE_DIR / "jobs/static",
 ]
-STATIC_ROOT = BASE_DIR / "ResumeBuilder/staticfiles"
+print(BASE_DIR)
+STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'ResumeBuilder/media'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Authentication redirects
 LOGIN_URL = 'candidate:login'
