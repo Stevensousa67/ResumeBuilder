@@ -5,19 +5,28 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
+# Install system dependencies required for build
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc python3-dev libpq-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy and install requirements first for layer caching
 COPY requirements.txt .
 RUN pip install --upgrade pip && \
     pip install --user -r requirements.txt
 
+# Copy application code
 COPY . .
 
-RUN python manage.py collectstatic --noinput 
+# Collect static files with proper paths
+RUN python manage.py collectstatic --noinput
 
 # Stage 2: Production
 FROM python:3.13-slim
 
+# Create app user and directories with proper permissions
 RUN useradd -m appuser && \
-    mkdir /app && \
+    mkdir -p /app/ResumeBuilder/staticfiles && \
     chown -R appuser:appuser /app
 
 WORKDIR /app
@@ -25,9 +34,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH="/home/appuser/.local/bin:${PATH}"
 
+# Copy dependencies from builder
 COPY --from=builder --chown=appuser:appuser /root/.local /home/appuser/.local
+
+# Copy application code
 COPY --chown=appuser:appuser . .
-COPY --chown=appuser:appuser --from=builder /app/ResumeBuilder/staticfiles /app/ResumeBuilder/staticfiles
+
+# Copy collected static files
+COPY --from=builder --chown=appuser:appuser /app/ResumeBuilder/staticfiles /app/ResumeBuilder/staticfiles
 
 USER appuser
 
