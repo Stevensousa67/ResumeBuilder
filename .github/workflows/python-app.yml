@@ -117,3 +117,4 @@ jobs:
               -v /app/media:/app/media \
               -e AWS_REGION=${{ secrets.AWS_REGION }} \
               ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
+            docker exec app python manage.py collectstatic --noinput
