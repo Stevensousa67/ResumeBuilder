@@ -108,13 +108,13 @@ jobs:
       #     key: ${{ secrets.EC2_SSH_KEY }}
       #     script: |
       #       aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
-            docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
-            docker stop app || true
-            docker rm app || true
-            docker run -d --name app -p 8000:8000 \
-              -v /app/staticfiles:/app/staticfiles \
-              -v /app/media:/app/media \
-              -e AWS_REGION=${{ secrets.AWS_REGION }} \
-              ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
-            docker exec app python manage.py collectstatic --noinput
+            # docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+            # docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
+            # docker stop app || true
+            # docker rm app || true
+            # docker run -d --name app -p 8000:8000 \
+            #   -v /app/staticfiles:/app/staticfiles \
+            #   -v /app/media:/app/media \
+            #   -e AWS_REGION=${{ secrets.AWS_REGION }} \
+            #   ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
+            # docker exec app python manage.py collectstatic --noinput
